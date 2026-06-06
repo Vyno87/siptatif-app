@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:siptatif_app/datas/models/mahasiswa.dart';
 import 'package:siptatif_app/datas/models/penguji.dart';
-import 'package:siptatif_app/datas/penguji_data.dart';
-
+import 'package:provider/provider.dart';
+import 'package:siptatif_app/providers/penguji_provider.dart';
 class MahasiswaDetailScreen extends StatefulWidget {
   const MahasiswaDetailScreen({super.key});
 
@@ -37,7 +37,7 @@ class _MahasiswaDetailScreenState extends State<MahasiswaDetailScreen> {
         body: TabBarView(
           children: [
             contentDetail(args),
-            inputPenguji(),
+            inputPenguji(context),
           ],
         ),
       ),
@@ -70,7 +70,7 @@ class _MahasiswaDetailScreenState extends State<MahasiswaDetailScreen> {
     );
   }
 
-  Widget inputPenguji() {
+  Widget inputPenguji(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -88,7 +88,7 @@ class _MahasiswaDetailScreenState extends State<MahasiswaDetailScreen> {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: pengujiData
+              children: context.watch<PengujiProvider>().listPenguji
                   .map((penguji) => _templatePengujiCard(penguji))
                   .toList(),
             ),

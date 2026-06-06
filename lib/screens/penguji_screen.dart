@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:siptatif_app/datas/models/penguji.dart';
-import 'package:siptatif_app/datas/penguji_data.dart';
+import 'package:siptatif_app/providers/penguji_provider.dart';
 
-class PengujiScreen extends StatefulWidget {
+class PengujiScreen extends StatelessWidget {
   const PengujiScreen({super.key});
 
   @override
-  State<PengujiScreen> createState() => _PengujiScreenState();
-}
-
-class _PengujiScreenState extends State<PengujiScreen> {
-  @override
   Widget build(BuildContext context) {
+    final provider = context.watch<PengujiProvider>();
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
       child: Column(
@@ -44,8 +42,8 @@ class _PengujiScreenState extends State<PengujiScreen> {
             ],
           ),
           Column(
-            children: pengujiData
-                .map((penguji) => _templatePengujiCard(penguji))
+            children: provider.listPenguji
+                .map((penguji) => _templatePengujiCard(context, penguji))
                 .toList(),
           ),
           const SizedBox(
@@ -56,9 +54,7 @@ class _PengujiScreenState extends State<PengujiScreen> {
     );
   }
 
-
-
-  Card _templatePengujiCard(Penguji penguji) {
+  Card _templatePengujiCard(BuildContext context, Penguji penguji) {
     return Card(
         elevation: 0,
         color: Colors.grey[200],
@@ -153,6 +149,7 @@ class _PengujiScreenState extends State<PengujiScreen> {
                                     ),
                                     TextButton(
                                       onPressed: () {
+                                        context.read<PengujiProvider>().hapusPenguji(penguji);
                                         Navigator.pop(context);
                                       },
                                       child: Container(

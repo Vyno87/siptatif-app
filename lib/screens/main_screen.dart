@@ -6,8 +6,9 @@ import 'package:siptatif_app/screens/mahasiswa_screen.dart';
 import 'package:siptatif_app/screens/penguji_screen.dart';
 import 'package:siptatif_app/screens/pembimbing_screen.dart';
 
-import 'package:siptatif_app/datas/user_data.dart';
-
+import 'package:provider/provider.dart';
+import 'package:siptatif_app/providers/auth_provider.dart';
+import 'package:siptatif_app/datas/models/user.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class MainScreen extends StatefulWidget {
@@ -29,10 +30,12 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<AuthProvider>().currentUser;
+
     return Scaffold(
       key: _scaffoldKey,
-      appBar: _appBar(),
-      drawer: _drawer(),
+      appBar: _appBar(user),
+      drawer: _drawer(user),
       body: _widgetBody[_selectedIndex],
       bottomNavigationBar: _bottomNavigationBar(),
 
@@ -137,7 +140,7 @@ class _MainScreenState extends State<MainScreen> {
   /// Top Navigation Bar Assets
   ////////////////////////////////////////////////////////////////////////////
 
-  AppBar _appBar() {
+  AppBar _appBar(User? user) {
     return AppBar(
       leading: Row(
         children: [
@@ -177,7 +180,7 @@ class _MainScreenState extends State<MainScreen> {
             await showDialog(
                 context: context,
                 builder: (_) =>
-                    PreviewProfilePictDialog(imgFile: userData.profilePict));
+                    PreviewProfilePictDialog(imgFile: user?.profilePict ?? ''));
           },
           onTap: () {
             showDialog<String>(
@@ -222,7 +225,7 @@ class _MainScreenState extends State<MainScreen> {
                     ));
           },
           child: CircleAvatar(
-            backgroundImage: AssetImage(userData.profilePict),
+            backgroundImage: AssetImage(user?.profilePict ?? ''),
             radius: 20,
           ),
         ),
@@ -246,7 +249,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  Drawer _drawer() {
+  Drawer _drawer(User? user) {
     return Drawer(
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -272,10 +275,10 @@ class _MainScreenState extends State<MainScreen> {
                             await showDialog(
                                 context: context,
                                 builder: (_) => PreviewProfilePictDialog(
-                                    imgFile: userData.profilePict));
+                                    imgFile: user?.profilePict ?? ''));
                           },
                           child: CircleAvatar(
-                            backgroundImage: AssetImage(userData.profilePict),
+                            backgroundImage: AssetImage(user?.profilePict ?? ''),
                             radius: 33,
                           ),
                         ),
@@ -296,7 +299,7 @@ class _MainScreenState extends State<MainScreen> {
                       height: 5,
                     ),
                     Text(
-                      '${userData.fullName}',
+                      user?.fullName ?? "",
                       style: const TextStyle(
                           color: Colors.black,
                           fontSize: 17,
@@ -304,7 +307,7 @@ class _MainScreenState extends State<MainScreen> {
                           letterSpacing: -0.5),
                     ),
                     Text(
-                      userData.email,
+                      user?.email ?? "",
                       style: const TextStyle(
                           color: Colors.black,
                           fontSize: 14,
@@ -331,7 +334,7 @@ class _MainScreenState extends State<MainScreen> {
                               width: 7,
                             ),
                             Text(
-                              userData.roles,
+                              user?.roles ?? "",
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: -0.4),

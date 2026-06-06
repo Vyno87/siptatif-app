@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:siptatif_app/datas/models/pembimbing.dart';
-import 'package:siptatif_app/datas/pembimbing_data.dart';
+import 'package:siptatif_app/providers/pembimbing_provider.dart';
 
-class PembimbingScreen extends StatefulWidget {
+class PembimbingScreen extends StatelessWidget {
   const PembimbingScreen({super.key});
 
   @override
-  State<PembimbingScreen> createState() => _PembimbingScreenState();
-}
-
-class _PembimbingScreenState extends State<PembimbingScreen> {
-  @override
   Widget build(BuildContext context) {
+    final provider = context.watch<PembimbingProvider>();
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
       child: Column(
@@ -44,8 +42,8 @@ class _PembimbingScreenState extends State<PembimbingScreen> {
             ],
           ),
           Column(
-            children: pembimbingData
-                .map((pembimbing) => _templatePembimbingCard(pembimbing))
+            children: provider.listPembimbing
+                .map((pembimbing) => _templatePembimbingCard(context, pembimbing))
                 .toList(),
           ),
           const SizedBox(
@@ -56,9 +54,7 @@ class _PembimbingScreenState extends State<PembimbingScreen> {
     );
   }
 
-
-
-  Card _templatePembimbingCard(Pembimbing pembimbing) {
+  Card _templatePembimbingCard(BuildContext context, Pembimbing pembimbing) {
     return Card(
         elevation: 0,
         color: Colors.grey[200],
@@ -154,6 +150,7 @@ class _PembimbingScreenState extends State<PembimbingScreen> {
                                     ),
                                     TextButton(
                                       onPressed: () {
+                                        context.read<PembimbingProvider>().hapusPembimbing(pembimbing);
                                         Navigator.pop(context);
                                       },
                                       child: Container(
