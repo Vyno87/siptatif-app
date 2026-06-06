@@ -41,11 +41,29 @@ class PengujiScreen extends StatelessWidget {
                   child: const Text("+ Tambah Data")),
             ],
           ),
-          Column(
-            children: provider.listPenguji
-                .map((penguji) => _templatePengujiCard(context, penguji))
-                .toList(),
-          ),
+          if (provider.isLoading)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(20.0),
+                child: CircularProgressIndicator(),
+              ),
+            )
+          else if (provider.errorMessage.isNotEmpty)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Text(
+                  provider.errorMessage,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            )
+          else
+            Column(
+              children: provider.listPenguji
+                  .map((penguji) => _templatePengujiCard(context, penguji))
+                  .toList(),
+            ),
           const SizedBox(
             height: 4,
           ),

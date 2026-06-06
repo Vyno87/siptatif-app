@@ -29,13 +29,23 @@ class MahasiswaScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(
-            height: 3,
+            height: 14,
           ),
-          Column(
-            children: provider.listMahasiswa
-                .map((mhs) => MahasiswaCard(mhs: mhs))
-                .toList(),
-          ),
+          if (provider.isLoading)
+            const Center(child: CircularProgressIndicator())
+          else if (provider.errorMessage.isNotEmpty)
+            Center(
+              child: Text(
+                provider.errorMessage,
+                style: const TextStyle(color: Colors.red),
+              ),
+            )
+          else
+            Column(
+              children: provider.listMahasiswa
+                  .map((mhs) => MahasiswaCard(mhs: mhs))
+                  .toList(),
+            ),
           const SizedBox(
             height: 4,
           ),

@@ -41,11 +41,30 @@ class PembimbingScreen extends StatelessWidget {
                   child: const Text("+ Tambah Data")),
             ],
           ),
-          Column(
-            children: provider.listPembimbing
-                .map((pembimbing) => _templatePembimbingCard(context, pembimbing))
-                .toList(),
-          ),
+          if (provider.isLoading)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(20.0),
+                child: CircularProgressIndicator(),
+              ),
+            )
+          else if (provider.errorMessage.isNotEmpty)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Text(
+                  provider.errorMessage,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            )
+          else
+            Column(
+              children: provider.listPembimbing
+                  .map((pembimbing) =>
+                      _templatePembimbingCard(context, pembimbing))
+                  .toList(),
+            ),
           const SizedBox(
             height: 4,
           ),

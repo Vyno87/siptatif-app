@@ -53,11 +53,7 @@ class _MainScreenState extends State<MainScreen> {
   /// Bottom Navigation Bar Assets
   ////////////////////////////////////////////////////////////////////////////
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
+
 
   int _selectedIndex = 0;
 

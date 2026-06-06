@@ -40,10 +40,35 @@ class PembimbingProvider extends ChangeNotifier {
     ),
   ];
 
-  List<Pembimbing> get listPembimbing => _semuaPembimbing;
+  List<Pembimbing> _displayedPembimbing = [];
+  bool isLoading = false;
+  String errorMessage = '';
+
+  PembimbingProvider() {
+    fetchPembimbing();
+  }
+
+  Future<void> fetchPembimbing() async {
+    isLoading = true;
+    errorMessage = '';
+    notifyListeners();
+
+    try {
+      await Future.delayed(const Duration(seconds: 2));
+      _displayedPembimbing = List.from(_semuaPembimbing);
+    } catch (e) {
+      errorMessage = "Terjadi kesalahan saat memuat data pembimbing.";
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  List<Pembimbing> get listPembimbing => _displayedPembimbing;
 
   void hapusPembimbing(Pembimbing p) {
     _semuaPembimbing.remove(p);
+    _displayedPembimbing.remove(p);
     notifyListeners();
   }
 }

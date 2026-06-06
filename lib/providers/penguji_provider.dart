@@ -40,10 +40,35 @@ class PengujiProvider extends ChangeNotifier {
     ),
   ];
 
-  List<Penguji> get listPenguji => _semuaPenguji;
+  List<Penguji> _displayedPenguji = [];
+  bool isLoading = false;
+  String errorMessage = '';
+
+  PengujiProvider() {
+    fetchPenguji();
+  }
+
+  Future<void> fetchPenguji() async {
+    isLoading = true;
+    errorMessage = '';
+    notifyListeners();
+
+    try {
+      await Future.delayed(const Duration(seconds: 2));
+      _displayedPenguji = List.from(_semuaPenguji);
+    } catch (e) {
+      errorMessage = "Terjadi kesalahan saat memuat data penguji.";
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  List<Penguji> get listPenguji => _displayedPenguji;
 
   void hapusPenguji(Penguji p) {
     _semuaPenguji.remove(p);
+    _displayedPenguji.remove(p);
     notifyListeners();
   }
 }

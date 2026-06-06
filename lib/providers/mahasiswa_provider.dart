@@ -77,9 +77,29 @@ class MahasiswaProvider extends ChangeNotifier {
 
   List<Mahasiswa> _displayedMahasiswa = [];
   String _searchKeyword = "";
+  
+  bool isLoading = false;
+  String errorMessage = '';
 
   MahasiswaProvider() {
-    _displayedMahasiswa = List.from(_semuaMahasiswa);
+    fetchMahasiswa();
+  }
+
+  Future<void> fetchMahasiswa() async {
+    isLoading = true;
+    errorMessage = '';
+    notifyListeners();
+
+    try {
+      // Simulasi request API ke backend
+      await Future.delayed(const Duration(seconds: 2));
+      _displayedMahasiswa = List.from(_semuaMahasiswa);
+    } catch (e) {
+      errorMessage = "Terjadi kesalahan saat memuat data mahasiswa.";
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
   }
 
   List<Mahasiswa> get listMahasiswa => _displayedMahasiswa;
