@@ -86,7 +86,7 @@ class _PenjadwalanSidangScreenState extends State<PenjadwalanSidangScreen> {
                       return; // Jangan simpan, hentikan operasi
                     }
                   } catch (e) {
-                    // Mahasiswa tidak ditemukan
+                    debugPrint('Gagal: $e');
                   }
 
                   // Jika tidak bentrok, simpan
@@ -162,7 +162,9 @@ class _PenjadwalanSidangScreenState extends State<PenjadwalanSidangScreen> {
                       String namaMhs = 'Unknown';
                       try {
                         namaMhs = mhsProvider.listMahasiswa.firstWhere((m) => m.nim == sidang.mahasiswaId).nama;
-                      } catch (e) {}
+                      } catch (e) {
+                        debugPrint('Gagal mencari nama mahasiswa: $e');
+                      }
 
                       return GlassCard(
                         child: ListTile(

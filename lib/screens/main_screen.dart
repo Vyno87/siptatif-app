@@ -7,6 +7,7 @@ import 'package:siptatif_app/screens/dosen_screen.dart';
 import 'package:siptatif_app/screens/logbook_mahasiswa_screen.dart';
 import 'package:siptatif_app/screens/pendaftaran_sidang_screen.dart';
 import 'package:siptatif_app/screens/penjadwalan_sidang_screen.dart';
+import 'package:siptatif_app/screens/penilaian_sidang_screen.dart';
 import 'package:siptatif_app/screens/mahasiswa_screen.dart';
 import 'package:siptatif_app/screens/penguji_screen.dart';
 import 'package:siptatif_app/screens/pembimbing_screen.dart';
@@ -608,6 +609,19 @@ class _MainScreenState extends State<MainScreen> {
               );
             },
           ),
+          if (user?.roles == 'Dosen') ...[
+            ListTile(
+              leading: Icon(Icons.grading_rounded, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87),
+              title: Text('Penilaian Sidang', style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black)),
+              onTap: () {
+                _scaffoldKey.currentState?.closeDrawer();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const PenilaianSidangScreen()),
+                );
+              },
+            ),
+          ],
           Builder(builder: (context) {
             return ListTile(
               leading: const Icon(Icons.exit_to_app, color: Colors.red),

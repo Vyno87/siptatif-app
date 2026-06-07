@@ -110,4 +110,26 @@ class SidangProvider extends ChangeNotifier {
     }
     return false;
   }
+
+  void hitungKelulusan(Sidang sidang) {
+    if (sidang.nilaiPenguji1 != null && sidang.nilaiPenguji2 != null && sidang.nilaiPembimbing != null) {
+      // Hitung rata-rata
+      double total = sidang.nilaiPenguji1! + sidang.nilaiPenguji2! + sidang.nilaiPembimbing!;
+      double rataRata = total / 3;
+      
+      sidang.nilaiAkhir = double.parse(rataRata.toStringAsFixed(2));
+
+      // Tentukan status kelulusan
+      if (rataRata >= 80) {
+        sidang.statusKelulusan = 'Lulus';
+      } else if (rataRata >= 60) {
+        sidang.statusKelulusan = 'Lulus Bersyarat';
+      } else {
+        sidang.statusKelulusan = 'Tidak Lulus';
+      }
+
+      // Jika semua nilai sudah masuk, otomatis ubah status sidang jadi Selesai
+      sidang.status = 'Selesai';
+    }
+  }
 }

@@ -197,6 +197,71 @@ class _PendaftaranSidangScreenState extends State<PendaftaranSidangScreen> {
               _buildDetailRow(Icons.access_time_rounded, 'Waktu', sidang.waktuSidang),
               const SizedBox(height: 12),
               _buildDetailRow(Icons.room_rounded, 'Ruangan', sidang.ruangan),
+              if (sidang.status == 'Selesai') ...[
+                const Divider(height: 40),
+                const Text(
+                  'Hasil Sidang Anda:',
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+                const SizedBox(height: 16),
+                _buildDetailRow(Icons.score_rounded, 'Nilai Akhir', sidang.nilaiAkhir?.toString() ?? '-'),
+                const SizedBox(height: 12),
+                _buildDetailRow(
+                  Icons.verified_user_rounded, 
+                  'Kelulusan', 
+                  sidang.statusKelulusan ?? '-',
+                ),
+                if (sidang.catatanRevisi != null && sidang.catatanRevisi!.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.orange.withValues(alpha: 0.5)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Row(
+                          children: [
+                            Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 18),
+                            SizedBox(width: 8),
+                            Text('Catatan Revisi:', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange)),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(sidang.catatanRevisi!),
+                      ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Unduh Berita Acara'),
+                        content: const Text('Dokumen PDF Berita Acara sedang disiapkan. (Simulasi)'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Tutup'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.print_rounded),
+                  label: const Text('Cetak Berita Acara'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                ),
+              ],
             ]
           ],
         ),

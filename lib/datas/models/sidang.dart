@@ -6,6 +6,12 @@ class Sidang {
   String waktuSidang;
   String ruangan;
   String status;
+  double? nilaiPenguji1;
+  double? nilaiPenguji2;
+  double? nilaiPembimbing;
+  String? catatanRevisi;
+  String? statusKelulusan;
+  double? nilaiAkhir;
 
   Sidang({
     this.id,
@@ -15,6 +21,12 @@ class Sidang {
     required this.waktuSidang,
     required this.ruangan,
     required this.status,
+    this.nilaiPenguji1,
+    this.nilaiPenguji2,
+    this.nilaiPembimbing,
+    this.catatanRevisi,
+    this.statusKelulusan,
+    this.nilaiAkhir,
   });
 
   factory Sidang.fromJson(Map<String, dynamic> json) {
@@ -26,6 +38,12 @@ class Sidang {
       waktuSidang: json['waktuSidang'] ?? '',
       ruangan: json['ruangan'] ?? '',
       status: json['status'] ?? 'Menunggu Jadwal',
+      nilaiPenguji1: json['nilaiPenguji1']?.toDouble(),
+      nilaiPenguji2: json['nilaiPenguji2']?.toDouble(),
+      nilaiPembimbing: json['nilaiPembimbing']?.toDouble(),
+      catatanRevisi: json['catatanRevisi'],
+      statusKelulusan: json['statusKelulusan'],
+      nilaiAkhir: json['nilaiAkhir']?.toDouble(),
     );
   }
 
@@ -38,6 +56,12 @@ class Sidang {
       'waktuSidang': waktuSidang,
       'ruangan': ruangan,
       'status': status,
+      if (nilaiPenguji1 != null) 'nilaiPenguji1': nilaiPenguji1,
+      if (nilaiPenguji2 != null) 'nilaiPenguji2': nilaiPenguji2,
+      if (nilaiPembimbing != null) 'nilaiPembimbing': nilaiPembimbing,
+      if (catatanRevisi != null) 'catatanRevisi': catatanRevisi,
+      if (statusKelulusan != null) 'statusKelulusan': statusKelulusan,
+      if (nilaiAkhir != null) 'nilaiAkhir': nilaiAkhir,
     };
   }
 }
