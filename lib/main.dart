@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:siptatif_app/screens/login_screen.dart';
 import 'package:siptatif_app/screens/lupa_password_screen.dart';
@@ -27,7 +29,17 @@ import 'package:siptatif_app/providers/yudisium_provider.dart';
 import 'package:siptatif_app/providers/theme_provider.dart';
 import 'package:siptatif_app/providers/chat_provider.dart';
 
-void main() {
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print("Handling a background message: ${message.messageId}");
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  
   runApp(const MainApp());
 }
 
@@ -39,6 +51,21 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
+  @override
+  void initState() {
+    super.initState();
+    _requestNotificationPermissions();
+  }
+
+  void _requestNotificationPermissions() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    await messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(

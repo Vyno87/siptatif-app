@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "432947851657",
+    "project_id": "siptatif-ecc87",
+    "storage_bucket": "siptatif-ecc87.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:432947851657:android:a1a7e3812715f747ea3158",
+        "android_client_info": {
+          "package_name": "com.hanzcorp.siptatif_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKIPPQod8hgao1I1RTpQh_1hTcVPjUMkk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
