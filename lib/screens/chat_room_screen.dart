@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:siptatif_app/providers/chat_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
+import 'package:url_launcher/url_launcher.dart';
 
 class ChatRoomScreen extends StatefulWidget {
   final String contactId;
@@ -22,6 +26,7 @@ class ChatRoomScreen extends StatefulWidget {
 class _ChatRoomScreenState extends State<ChatRoomScreen> {
   final TextEditingController _msgController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  bool _isUploading = false;
 
   @override
   void initState() {
@@ -40,6 +45,51 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
+    }
+  }
+
+  Future<void> _pickAndUploadFile() async {
+    FilePickerResult? result = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'doc', 'docx'],
+    );
+
+    if (result != null && result.files.single.path != null) {
+      setState(() {
+        _isUploading = true;
+      });
+
+      try {
+        File file = File(result.files.single.path!);
+        String fileName = "${DateTime.now().millisecondsSinceEpoch}_${result.files.single.name}";
+        Reference ref = FirebaseStorage.instance.ref().child('chat_files/$fileName');
+        UploadTask uploadTask = ref.putFile(file);
+        
+        TaskSnapshot snapshot = await uploadTask;
+        String downloadUrl = await snapshot.ref.getDownloadURL();
+
+        if (mounted) {
+          context.read<ChatProvider>().sendMessage(
+            widget.currentUserId,
+            widget.contactId,
+            "Mengirim file: ${result.files.single.name}",
+            fileUrl: downloadUrl,
+          );
+          Future.delayed(const Duration(milliseconds: 100), () => _scrollToBottom());
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Gagal mengunggah file')),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isUploading = false;
+          });
+        }
+      }
     }
   }
 
@@ -112,6 +162,24 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                               fontSize: 15,
                             ),
                           ),
+                          if (chat.fileUrl != null) ...[
+                            const SizedBox(height: 8),
+                            ElevatedButton.icon(
+                              onPressed: () async {
+                                final uri = Uri.parse(chat.fileUrl!);
+                                if (await canLaunchUrl(uri)) {
+                                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                }
+                              },
+                              icon: Icon(Icons.download, size: 16, color: isMe ? Colors.blue[800] : Colors.white),
+                              label: Text("Unduh File", style: TextStyle(color: isMe ? Colors.blue[800] : Colors.white, fontSize: 12)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: isMe ? Colors.white : Colors.blue[800],
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                minimumSize: const Size(0, 30),
+                              ),
+                            )
+                          ],
                           const SizedBox(height: 4),
                           Text(
                             time,
@@ -148,6 +216,20 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
+                  if (_isUploading)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  else
+                    IconButton(
+                      icon: const Icon(Icons.attach_file, color: Colors.grey),
+                      onPressed: _pickAndUploadFile,
+                    ),
                   CircleAvatar(
                     backgroundColor: Colors.blue[800],
                     child: IconButton(

@@ -4,6 +4,7 @@ import 'package:siptatif_app/datas/models/sidang.dart';
 import 'package:siptatif_app/providers/auth_provider.dart';
 import 'package:siptatif_app/providers/sidang_provider.dart';
 import 'package:siptatif_app/widgets/glass_card.dart';
+import 'package:siptatif_app/screens/qr_generator_screen.dart';
 
 class PendaftaranSidangScreen extends StatefulWidget {
   const PendaftaranSidangScreen({super.key});
@@ -197,6 +198,24 @@ class _PendaftaranSidangScreenState extends State<PendaftaranSidangScreen> {
               _buildDetailRow(Icons.access_time_rounded, 'Waktu', sidang.waktuSidang),
               const SizedBox(height: 12),
               _buildDetailRow(Icons.room_rounded, 'Ruangan', sidang.ruangan),
+              if (sidang.status == 'Dijadwalkan') ...[
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => QrGeneratorScreen(sidang: sidang)),
+                    );
+                  },
+                  icon: const Icon(Icons.qr_code),
+                  label: const Text('Tampilkan QR Kehadiran'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue[800],
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                ),
+              ],
               if (sidang.status == 'Selesai') ...[
                 const Divider(height: 40),
                 const Text(

@@ -4,6 +4,7 @@ class Chat {
   String receiverId;
   String message;
   String timestamp;
+  String? fileUrl;
 
   Chat({
     this.id,
@@ -11,6 +12,7 @@ class Chat {
     required this.receiverId,
     required this.message,
     required this.timestamp,
+    this.fileUrl,
   });
 
   factory Chat.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class Chat {
       receiverId: json['receiverId'] ?? '',
       message: json['message'] ?? '',
       timestamp: json['timestamp'] ?? '',
+      fileUrl: json['fileUrl']?.toString(),
     );
   }
 
@@ -30,6 +33,7 @@ class Chat {
       'receiverId': receiverId,
       'message': message,
       'timestamp': timestamp,
+      if (fileUrl != null) 'fileUrl': fileUrl,
     };
   }
 }

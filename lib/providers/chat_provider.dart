@@ -26,13 +26,14 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> sendMessage(String senderId, String receiverId, String message) async {
+  Future<void> sendMessage(String senderId, String receiverId, String message, {String? fileUrl}) async {
     try {
       final chat = Chat(
         senderId: senderId,
         receiverId: receiverId,
         message: message,
         timestamp: DateTime.now().toIso8601String(),
+        fileUrl: fileUrl,
       );
 
       final response = await ApiService.post('chats', chat.toJson());

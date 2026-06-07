@@ -4,6 +4,7 @@ import 'package:siptatif_app/datas/models/sidang.dart';
 import 'package:siptatif_app/providers/mahasiswa_provider.dart';
 import 'package:siptatif_app/providers/sidang_provider.dart';
 import 'package:siptatif_app/widgets/glass_card.dart';
+import 'package:add_2_calendar/add_2_calendar.dart';
 
 class PenjadwalanSidangScreen extends StatefulWidget {
   const PenjadwalanSidangScreen({super.key});
@@ -195,9 +196,29 @@ class _PenjadwalanSidangScreenState extends State<PenjadwalanSidangScreen> {
                               ]
                             ],
                           ),
-                          trailing: ElevatedButton(
-                            onPressed: () => _showPenjadwalanDialog(context, sidang, namaMhs),
-                            child: const Text('Tetapkan'),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (sidang.status == 'Dijadwalkan')
+                                IconButton(
+                                  icon: const Icon(Icons.event_available, color: Colors.blue),
+                                  tooltip: 'Simpan ke Kalender HP',
+                                  onPressed: () {
+                                    final Event event = Event(
+                                      title: 'Sidang Tugas Akhir: $namaMhs',
+                                      description: 'Jadwal Sidang SIPTATIF untuk NIM ${sidang.mahasiswaId}',
+                                      location: sidang.ruangan.isEmpty ? 'Kampus' : sidang.ruangan,
+                                      startDate: DateTime.tryParse('${sidang.tanggalSidang} ${sidang.waktuSidang}:00') ?? DateTime.now(),
+                                      endDate: DateTime.tryParse('${sidang.tanggalSidang} ${sidang.waktuSidang}:00')?.add(const Duration(hours: 2)) ?? DateTime.now().add(const Duration(hours: 2)),
+                                    );
+                                    Add2Calendar.addEvent2Cal(event);
+                                  },
+                                ),
+                              ElevatedButton(
+                                onPressed: () => _showPenjadwalanDialog(context, sidang, namaMhs),
+                                child: Text(sidang.status == 'Menunggu Jadwal' ? 'Tetapkan' : 'Ubah'),
+                              ),
+                            ],
                           ),
                         ),
                       );

@@ -5,6 +5,7 @@ import 'package:siptatif_app/providers/auth_provider.dart';
 import 'package:siptatif_app/providers/mahasiswa_provider.dart';
 import 'package:siptatif_app/providers/sidang_provider.dart';
 import 'package:siptatif_app/widgets/glass_card.dart';
+import 'package:siptatif_app/screens/qr_scanner_screen.dart';
 import 'package:signature/signature.dart';
 import 'dart:convert';
 
@@ -202,6 +203,23 @@ class _PenilaianSidangScreenState extends State<PenilaianSidangScreen> {
         title: const Text('Penilaian Sidang'),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.qr_code_scanner),
+            tooltip: 'Scan Kehadiran',
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const QrScannerScreen()),
+              );
+              if (result != null && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Kehadiran Sidang $result berhasil dicatat!')),
+                );
+              }
+            },
+          )
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

@@ -13,6 +13,7 @@ import 'package:siptatif_app/screens/penguji_screen.dart';
 import 'package:siptatif_app/screens/pembimbing_screen.dart';
 import 'package:siptatif_app/screens/pengaturan_screen.dart';
 import 'package:siptatif_app/screens/chat_list_screen.dart';
+import 'package:siptatif_app/screens/dashboard_statistik_screen.dart';
 
 import 'package:provider/provider.dart';
 import 'package:siptatif_app/providers/auth_provider.dart';
@@ -36,6 +37,7 @@ class _MainScreenState extends State<MainScreen> {
     const MahasiswaScreen(),
     const PengujiScreen(),
     const PembimbingScreen(),
+    const DashboardStatistikScreen(),
   ];
 
   List<Widget> get _dosenWidgetBody => [
@@ -130,6 +132,7 @@ class _MainScreenState extends State<MainScreen> {
           _botBarItem(context: context, icon: "assets/svgs/penguji-icon.svg", label: "Penguji"),
           _botBarItem(context: context, 
               icon: "assets/svgs/pembimbing-icon.svg", label: "Pembimbing"),
+          _botBarItemIcon(context: context, icon: Icons.pie_chart, label: "Statistik"),
         ],
         useLegacyColorScheme: false,
         selectedFontSize: 12,
@@ -172,6 +175,29 @@ class _MainScreenState extends State<MainScreen> {
             icon,
             width: 33,
             colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn),
+          ),
+        ),
+        label: label);
+  }
+
+  BottomNavigationBarItem _botBarItemIcon(
+      {required BuildContext context, required IconData icon, required String label}) {
+    return BottomNavigationBarItem(
+        icon: Icon(
+          icon,
+          size: 33,
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
+        ),
+        activeIcon: Container(
+          width: 70,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            color: Theme.of(context).brightness == Brightness.dark ? Colors.deepPurple[900] : Colors.purple[50],
+          ),
+          child: Icon(
+            icon,
+            size: 33,
+            color: Theme.of(context).colorScheme.primary,
           ),
         ),
         label: label);
