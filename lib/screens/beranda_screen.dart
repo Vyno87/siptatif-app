@@ -5,6 +5,7 @@ import 'package:siptatif_app/providers/mahasiswa_provider.dart';
 import 'package:siptatif_app/providers/pembimbing_provider.dart';
 import 'package:siptatif_app/providers/penguji_provider.dart';
 import 'package:siptatif_app/widgets/beranda_card.dart';
+import 'package:siptatif_app/services/pdf_service.dart';
 
 class BerandaObject {
   String nama;
@@ -171,6 +172,32 @@ class _HomeScreenState extends State<HomeScreen> {
                     ))
                 .toList(),
           ),
+          const SizedBox(height: 30),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  await PdfService.exportLaporanSidang(mahasiswaProvider.listMahasiswa);
+                },
+                icon: const Icon(Icons.picture_as_pdf, color: Colors.white),
+                label: const Text(
+                  "Export Laporan Sidang (PDF)",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.redAccent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 5,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
         ],
       ),
     );
