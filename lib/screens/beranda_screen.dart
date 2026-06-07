@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:provider/provider.dart';
+import 'package:siptatif_app/providers/mahasiswa_provider.dart';
+import 'package:siptatif_app/providers/pembimbing_provider.dart';
+import 'package:siptatif_app/providers/penguji_provider.dart';
 import 'package:siptatif_app/widgets/beranda_card.dart';
 
 class BerandaObject {
@@ -28,23 +33,166 @@ List<BerandaObject> berandaData = [
   ),
 ];
 
+
+
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final void Function(int)? onNavigate;
+  const HomeScreen({super.key, this.onNavigate});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  int touchedIndex = -1;
+
   @override
   Widget build(BuildContext context) {
+    final mahasiswaProvider = context.watch<MahasiswaProvider>();
+    final pembimbingProvider = context.watch<PembimbingProvider>();
+    final pengujiProvider = context.watch<PengujiProvider>();
+
+    int mhsCount = mahasiswaProvider.listMahasiswa.length;
+    int mhsDisetujui = mahasiswaProvider.listMahasiswa.where((m) => m.statusBerkas == 'Disetujui').length;
+
+    int pembimbingCount = pembimbingProvider.listPembimbing.length;
+    int pembimbingKuotaTotal = pembimbingProvider.listPembimbing.fold(0, (sum, item) => sum + item.kuota);
+
+    int pengujiCount = pengujiProvider.listPenguji.length;
+    int pengujiKuotaTotal = pengujiProvider.listPenguji.fold(0, (sum, item) => sum + item.kuota);
+
+    // Menghindari pembagian dengan 0 jika data kosong
+    int total = mhsCount + pembimbingCount + pengujiCount;
+    if (total == 0) total = 1;
+
+    List<BerandaObject> dynamicBerandaData = [
+      BerandaObject(nama: "Mahasiswa", terdaftar: mhsCount, kuota: mhsDisetujui),
+      BerandaObject(nama: "Penguji", terdaftar: pengujiCount, kuota: pengujiKuotaTotal),
+      BerandaObject(nama: "Pembimbing", terdaftar: pembimbingCount, kuota: pembimbingKuotaTotal),
+    ];
+
     return SingleChildScrollView(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
-        children: berandaData
-            .map((ret) => BerandaCard(berandaData: ret))
-            .toList(),
+        children: [
+          const SizedBox(height: 10),
+          Text(
+            "Dashboard Analitik",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.5,
+              color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
+            ),
+          ),
+          const SizedBox(height: 20),
+          // Bagian Pie Chart
+          SizedBox(
+            height: 200,
+            child: PieChart(
+              PieChartData(
+                pieTouchData: PieTouchData(
+                  touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                    setState(() {
+                      if (!event.isInterestedForInteractions ||
+                          pieTouchResponse == null ||
+                          pieTouchResponse.touchedSection == null) {
+                        touchedIndex = -1;
+                        return;
+                      }
+                      touchedIndex = pieTouchResponse.touchedSection!.touchedSectionIndex;
+                    });
+                  },
+                ),
+                sectionsSpace: 2,
+                centerSpaceRadius: 40,
+                sections: [
+                  PieChartSectionData(
+                    color: Colors.blueAccent,
+                    value: (mhsCount / total) * 100,
+                    title: '${((mhsCount / total) * 100).toStringAsFixed(1)}%',
+                    radius: touchedIndex == 0 ? 60.0 : 50.0,
+                    titleStyle: TextStyle(
+                        fontSize: touchedIndex == 0 ? 18.0 : 14.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
+                  ),
+                  PieChartSectionData(
+                    color: Colors.green,
+                    value: (pembimbingCount / total) * 100,
+                    title: '${((pembimbingCount / total) * 100).toStringAsFixed(1)}%',
+                    radius: touchedIndex == 1 ? 60.0 : 50.0,
+                    titleStyle: TextStyle(
+                        fontSize: touchedIndex == 1 ? 18.0 : 14.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
+                  ),
+                  PieChartSectionData(
+                    color: Colors.orange,
+                    value: (pengujiCount / total) * 100,
+                    title: '${((pengujiCount / total) * 100).toStringAsFixed(1)}%',
+                    radius: touchedIndex == 2 ? 60.0 : 50.0,
+                    titleStyle: TextStyle(
+                        fontSize: touchedIndex == 2 ? 18.0 : 14.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildLegend(context, Colors.blueAccent, "Mahasiswa"),
+              const SizedBox(width: 10),
+              _buildLegend(context, Colors.green, "Pembimbing"),
+              const SizedBox(width: 10),
+              _buildLegend(context, Colors.orange, "Penguji"),
+            ],
+          ),
+          const SizedBox(height: 20),
+          const Divider(),
+          // Bagian Card
+          Column(
+            children: dynamicBerandaData
+                .map((ret) => BerandaCard(
+                      berandaData: ret,
+                      onTapDetail: () {
+                        if (ret.nama == 'Mahasiswa') {
+                          widget.onNavigate?.call(1);
+                        } else if (ret.nama == 'Penguji') {
+                          widget.onNavigate?.call(2);
+                        } else if (ret.nama == 'Pembimbing') {
+                          widget.onNavigate?.call(3);
+                        }
+                      },
+                    ))
+                .toList(),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildLegend(BuildContext context, Color color, String text) {
+    return Row(
+      children: [
+        Container(
+          width: 16,
+          height: 16,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: color,
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
+        ),
+      ],
     );
   }
 }

@@ -3,6 +3,10 @@ import 'package:siptatif_app/datas/models/mahasiswa.dart';
 import 'package:siptatif_app/datas/models/penguji.dart';
 import 'package:provider/provider.dart';
 import 'package:siptatif_app/providers/penguji_provider.dart';
+import 'package:siptatif_app/providers/mahasiswa_provider.dart';
+import 'package:timeline_tile/timeline_tile.dart';
+import 'package:siptatif_app/screens/pdf_viewer_screen.dart';
+
 class MahasiswaDetailScreen extends StatefulWidget {
   const MahasiswaDetailScreen({super.key});
 
@@ -11,20 +15,52 @@ class MahasiswaDetailScreen extends StatefulWidget {
 }
 
 class _MahasiswaDetailScreenState extends State<MahasiswaDetailScreen> {
-  bool value = false;
-  bool value2 = false;
+  bool value = false; // Disetujui
+  bool value2 = false; // Ditolak
+  
+  final _catatanController = TextEditingController();
+  final _penguji1Controller = TextEditingController();
+  final _penguji2Controller = TextEditingController();
+  bool _isInitialized = false;
+
+  @override
+  void dispose() {
+    _catatanController.dispose();
+    _penguji1Controller.dispose();
+    _penguji2Controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      final args = ModalRoute.of(context)?.settings.arguments as Mahasiswa?;
+      if (args != null) {
+        value = args.statusBerkas == "Disetujui";
+        value2 = args.statusBerkas == "Ditolak";
+        _catatanController.text = args.catatanUntukMahasiswa;
+        _penguji1Controller.text = args.dosenPenguji1 ?? '';
+        _penguji2Controller.text = args.dosenPenguji2 ?? '';
+      }
+      _isInitialized = true;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments as Mahasiswa;
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           bottom: const TabBar(
             tabs: [
               Tab(
                 text: "Berkas Mahasiswa",
+              ),
+              Tab(
+                text: "Status & Timeline",
               ),
               Tab(
                 text: "Input Dos. Penguji",
@@ -37,14 +73,15 @@ class _MahasiswaDetailScreenState extends State<MahasiswaDetailScreen> {
         body: TabBarView(
           children: [
             contentDetail(args),
-            inputPenguji(context),
+            statusTimeline(args),
+            inputPenguji(context, args),
           ],
         ),
       ),
     );
   }
 
-  Widget _textFieldGenerator(String label) {
+  Widget _textFieldGenerator(String label, {TextEditingController? controller}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -56,6 +93,7 @@ class _MahasiswaDetailScreenState extends State<MahasiswaDetailScreen> {
         const SizedBox(height: 5),
         SizedBox(
           child: TextField(
+            controller: controller,
             style: const TextStyle(height: 1),
             decoration: InputDecoration(
               border: OutlineInputBorder(
@@ -70,7 +108,7 @@ class _MahasiswaDetailScreenState extends State<MahasiswaDetailScreen> {
     );
   }
 
-  Widget inputPenguji(BuildContext context) {
+  Widget inputPenguji(BuildContext context, Mahasiswa mhs) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -96,8 +134,8 @@ class _MahasiswaDetailScreenState extends State<MahasiswaDetailScreen> {
           const SizedBox(
             height: 23,
           ),
-          _textFieldGenerator("Input Dosen Penguji 1"),
-          _textFieldGenerator("Input Dosen Penguji 2"),
+          _textFieldGenerator("Input Dosen Penguji 1", controller: _penguji1Controller),
+          _textFieldGenerator("Input Dosen Penguji 2", controller: _penguji2Controller),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -111,8 +149,24 @@ class _MahasiswaDetailScreenState extends State<MahasiswaDetailScreen> {
                 width: 8,
               ),
               FilledButton(
-                  onPressed: () {
-                    Navigator.pop(context);
+                  onPressed: () async {
+                    final currentContext = context;
+                    try {
+                      mhs.dosenPenguji1 = _penguji1Controller.text;
+                      mhs.dosenPenguji2 = _penguji2Controller.text;
+                      await currentContext.read<MahasiswaProvider>().updateMahasiswa(mhs);
+                      
+                      if (!currentContext.mounted) return;
+                      ScaffoldMessenger.of(currentContext).showSnackBar(
+                        const SnackBar(content: Text('Dosen Penguji berhasil ditugaskan!')),
+                      );
+                      Navigator.pop(currentContext);
+                    } catch (e) {
+                      if (!currentContext.mounted) return;
+                      ScaffoldMessenger.of(currentContext).showSnackBar(
+                        SnackBar(content: Text('Gagal: $e')),
+                      );
+                    }
                   },
                   child: const Text("Kirim"))
             ],
@@ -125,7 +179,7 @@ class _MahasiswaDetailScreenState extends State<MahasiswaDetailScreen> {
   Card _templatePengujiCard(Penguji penguji) {
     return Card(
         elevation: 0,
-        color: Colors.grey[200],
+        color: Theme.of(context).cardColor,
         margin: const EdgeInsets.fromLTRB(0, 18, 17, 0),
         child: Padding(
           padding: const EdgeInsets.all(12.0),
@@ -140,9 +194,9 @@ class _MahasiswaDetailScreenState extends State<MahasiswaDetailScreen> {
               const SizedBox(
                 height: 4,
               ),
-              const Divider(
+              Divider(
                 height: 1,
-                color: Colors.black,
+                color: Theme.of(context).dividerColor,
                 thickness: 0.8,
               ),
               const SizedBox(
@@ -201,7 +255,13 @@ class _MahasiswaDetailScreenState extends State<MahasiswaDetailScreen> {
       child: Column(
         children: [
           _contentInput("Jenis Pendaftaran", mhs.jenisPendaftaran),
-          _contentInput("Nama Mahasiswa", mhs.nama),
+          Hero(
+            tag: 'mhs-nama-${mhs.nim}',
+            child: Material(
+              type: MaterialType.transparency,
+              child: _contentInput("Nama Mahasiswa", mhs.nama),
+            ),
+          ),
           _contentInput("NIM Mahasiswa", mhs.nim),
           _contentInput("Email Mahasiswa", mhs.email),
           _contentInput("Judul Tugas Akhir", mhs.judulTugasAkhir),
@@ -223,18 +283,36 @@ class _MahasiswaDetailScreenState extends State<MahasiswaDetailScreen> {
                 width: 320,
                 height: 115,
                 decoration:
-                    BoxDecoration(border: Border.all(color: Colors.black)),
+                    BoxDecoration(border: Border.all(color: Theme.of(context).dividerColor)),
                 child: Column(
                   children: [
                     const SizedBox(
                       height: 20,
                     ),
-                    const Text("Buka Berkas"),
+                    Text(mhs.berkas.isNotEmpty ? "Berkas: ${mhs.berkas.split(RegExp(r'[\\/]')).last}" : "Buka Berkas"),
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        if (mhs.berkas.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Tidak ada berkas yang diunggah.')),
+                          );
+                          return;
+                        }
+                        // Membuka PDF Viewer dengan URL/Path berkas yang tersimpan
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PdfViewerScreen(
+                              pdfUrl: mhs.berkas,
+                              title: 'Proposal TA - ${mhs.nama}',
+                            ),
+                          ),
+                        );
+                      },
                       icon: const Icon(
-                        Icons.upload_file_rounded,
+                        Icons.picture_as_pdf_rounded,
                         size: 40,
+                        color: Colors.redAccent,
                       ),
                     ),
                   ],
@@ -279,7 +357,7 @@ class _MahasiswaDetailScreenState extends State<MahasiswaDetailScreen> {
           const SizedBox(
             height: 10,
           ),
-          _contentInput("Catatan Untuk Mahasiswa", mhs.catatanUntukMahasiswa),
+          _contentInputController("Catatan Untuk Mahasiswa", _catatanController),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -293,10 +371,33 @@ class _MahasiswaDetailScreenState extends State<MahasiswaDetailScreen> {
                 width: 8,
               ),
               FilledButton(
-                  onPressed: () {
-                    Navigator.pop(context);
+                  onPressed: () async {
+                    final currentContext = context;
+                    try {
+                      if (value) {
+                        mhs.statusBerkas = "Disetujui";
+                      } else if (value2) {
+                        mhs.statusBerkas = "Ditolak";
+                      } else {
+                        mhs.statusBerkas = "Menunggu";
+                      }
+                      mhs.catatanUntukMahasiswa = _catatanController.text;
+                      
+                      await currentContext.read<MahasiswaProvider>().updateMahasiswa(mhs);
+                      
+                      if (!currentContext.mounted) return;
+                      ScaffoldMessenger.of(currentContext).showSnackBar(
+                        const SnackBar(content: Text('Status Berkas berhasil diperbarui!')),
+                      );
+                      Navigator.pop(currentContext);
+                    } catch (e) {
+                      if (!currentContext.mounted) return;
+                      ScaffoldMessenger.of(currentContext).showSnackBar(
+                        SnackBar(content: Text('Gagal: $e')),
+                      );
+                    }
                   },
-                  child: const Text("Kirim"))
+                  child: const Text("Simpan Status"))
             ],
           )
         ],
@@ -327,6 +428,159 @@ class _MahasiswaDetailScreenState extends State<MahasiswaDetailScreen> {
         ),
         const SizedBox(height: 20),
       ],
+    );
+  }
+
+  Widget _contentInputController(String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+              fontWeight: FontWeight.bold, fontSize: 17, letterSpacing: -0.5),
+        ),
+        const SizedBox(height: 5),
+        SizedBox(
+          child: TextFormField(
+            controller: controller,
+            style: const TextStyle(height: 1),
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+
+  Widget statusTimeline(Mahasiswa mhs) {
+    bool isDisetujui = mhs.statusBerkas == "Disetujui";
+    bool isDitolak = mhs.statusBerkas == "Ditolak";
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Pelacakan Berkas Tugas Akhir",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 20),
+          _buildTimelineTile(
+            isFirst: true,
+            isLast: false,
+            isPast: true,
+            title: "Pengajuan Judul",
+            subtitle: "Mahasiswa mengirimkan form pengajuan",
+            icon: Icons.check_circle,
+            color: Colors.green,
+          ),
+          _buildTimelineTile(
+            isFirst: false,
+            isLast: false,
+            isPast: true,
+            title: "Review Koordinator",
+            subtitle: "Koordinator TA meninjau berkas",
+            icon: Icons.check_circle,
+            color: Colors.green,
+          ),
+          _buildTimelineTile(
+            isFirst: false,
+            isLast: false,
+            isPast: isDisetujui || isDitolak,
+            title: "Persetujuan Berkas",
+            subtitle: isDisetujui
+                ? "Berkas disetujui, lanjut penunjukan pembimbing"
+                : isDitolak
+                    ? "Berkas ditolak, harap perbaiki"
+                    : "Menunggu keputusan koordinator",
+            icon: isDisetujui
+                ? Icons.check_circle
+                : isDitolak
+                    ? Icons.cancel
+                    : Icons.hourglass_bottom,
+            color: isDisetujui
+                ? Colors.green
+                : isDitolak
+                    ? Colors.red
+                    : Colors.orange,
+          ),
+          _buildTimelineTile(
+            isFirst: false,
+            isLast: true,
+            isPast: false,
+            title: "Penunjukan Pembimbing",
+            subtitle: isDisetujui
+                ? "Segera ditunjuk"
+                : "Terkunci",
+            icon: Icons.lock,
+            color: Colors.grey,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimelineTile({
+    required bool isFirst,
+    required bool isLast,
+    required bool isPast,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+  }) {
+    return SizedBox(
+      height: 90,
+      child: TimelineTile(
+        isFirst: isFirst,
+        isLast: isLast,
+        beforeLineStyle: LineStyle(
+          color: isPast ? color : Colors.grey.shade300,
+        ),
+        indicatorStyle: IndicatorStyle(
+          width: 40,
+          color: color,
+          iconStyle: IconStyle(
+            iconData: icon,
+            color: Colors.white,
+          ),
+        ),
+        endChild: Padding(
+          padding: const EdgeInsets.only(left: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: isPast ? Theme.of(context).colorScheme.onSurface : Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: isPast ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8) : Colors.grey,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:siptatif_app/datas/models/pembimbing.dart';
 import 'package:siptatif_app/providers/pembimbing_provider.dart';
+import 'package:siptatif_app/providers/notifikasi_provider.dart';
+import 'package:siptatif_app/widgets/glass_card.dart';
 
 class PembimbingScreen extends StatelessWidget {
   const PembimbingScreen({super.key});
@@ -60,10 +62,25 @@ class PembimbingScreen extends StatelessWidget {
             )
           else
             Column(
-              children: provider.listPembimbing
-                  .map((pembimbing) =>
-                      _templatePembimbingCard(context, pembimbing))
-                  .toList(),
+              children: provider.listPembimbing.asMap().entries.map((entry) {
+                final index = entry.key;
+                final pembimbing = entry.value;
+                return TweenAnimationBuilder(
+                  tween: Tween<double>(begin: 0, end: 1),
+                  duration: Duration(milliseconds: 300 + (index * 100)),
+                  curve: Curves.easeOutCubic,
+                  builder: (context, value, child) {
+                    return Transform.translate(
+                      offset: Offset(0, 50 * (1 - value)),
+                      child: Opacity(
+                        opacity: value,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: _templatePembimbingCard(context, pembimbing),
+                );
+              }).toList(),
             ),
           const SizedBox(
             height: 4,
@@ -73,10 +90,9 @@ class PembimbingScreen extends StatelessWidget {
     );
   }
 
-  Card _templatePembimbingCard(BuildContext context, Pembimbing pembimbing) {
-    return Card(
-        elevation: 0,
-        color: Colors.grey[200],
+  Widget _templatePembimbingCard(BuildContext context, Pembimbing pembimbing) {
+    return GlassCard(
+        color: Theme.of(context).brightness == Brightness.light ? Colors.white.withValues(alpha: 0.5) : Colors.black.withValues(alpha: 0.5),
         margin: const EdgeInsets.fromLTRB(0, 16.0, 0, 0),
         child: Padding(
           padding: const EdgeInsets.all(12.0),
@@ -95,9 +111,9 @@ class PembimbingScreen extends StatelessWidget {
                   const SizedBox(
                     height: 4,
                   ),
-                  const Divider(
+                  Divider(
                     height: 1,
-                    color: Colors.black,
+                    color: Theme.of(context).dividerColor,
                     thickness: 0.8,
                   ),
                   const SizedBox(
@@ -170,7 +186,14 @@ class PembimbingScreen extends StatelessWidget {
                                     TextButton(
                                       onPressed: () {
                                         context.read<PembimbingProvider>().hapusPembimbing(pembimbing);
+                                        context.read<NotifikasiProvider>().tambahNotifikasi(
+                                          "Data Pembimbing Dihapus",
+                                          "Data pembimbing bernama ${pembimbing.nama} telah dihapus dari sistem."
+                                        );
                                         Navigator.pop(context);
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(content: Text('Data berhasil dihapus secara real-time!')),
+                                        );
                                       },
                                       child: Container(
                                           padding: const EdgeInsets.all(15),

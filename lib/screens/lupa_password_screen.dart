@@ -9,7 +9,14 @@ class LupaPasswordScreen extends StatefulWidget {
 }
 
 class _LupaPasswordScreenState extends State<LupaPasswordScreen> {
+  final _emailController = TextEditingController();
   bool passwordVisible = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +57,7 @@ class _LupaPasswordScreenState extends State<LupaPasswordScreen> {
                 SizedBox(
                   width: 243,
                   child: TextField(
+                    controller: _emailController,
                     style: const TextStyle(height: 1),
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
@@ -61,7 +69,17 @@ class _LupaPasswordScreenState extends State<LupaPasswordScreen> {
                 ),
                 IconButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, "/reset-password");
+                    final email = _emailController.text.trim();
+                    if (email.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Harap masukkan email terlebih dahulu')),
+                      );
+                      return;
+                    }
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Tautan reset password berhasil dikirim (Simulasi)!')),
+                    );
+                    Navigator.pushNamed(context, "/reset-password", arguments: email);
                   },
                   icon: SvgPicture.asset(
                     "assets/svgs/sent-verif-link.svg",
@@ -139,15 +157,15 @@ class _LupaPasswordScreenState extends State<LupaPasswordScreen> {
                 Navigator.pop(context);
               },
               style: TextButton.styleFrom(
-                  backgroundColor: Colors.black,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   fixedSize: const Size(329, 50)),
-              child: const Text(
+              child: Text(
                 'Back To Login Page',
                 style: TextStyle(
                   fontFamily: "Montserrat-SemiBold",
                   fontSize: 17,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onPrimary,
                 ),
               ),
             ),

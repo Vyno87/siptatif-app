@@ -1,13 +1,18 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:siptatif_app/dialogs/preview_profile_pict.dart';
 
 import 'package:siptatif_app/screens/beranda_screen.dart';
+import 'package:siptatif_app/screens/dosen_screen.dart';
 import 'package:siptatif_app/screens/mahasiswa_screen.dart';
 import 'package:siptatif_app/screens/penguji_screen.dart';
 import 'package:siptatif_app/screens/pembimbing_screen.dart';
+import 'package:siptatif_app/screens/pengaturan_screen.dart';
 
 import 'package:provider/provider.dart';
 import 'package:siptatif_app/providers/auth_provider.dart';
+import 'package:siptatif_app/providers/notifikasi_provider.dart';
+import 'package:siptatif_app/providers/theme_provider.dart';
 import 'package:siptatif_app/datas/models/user.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -21,31 +26,47 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  final List<Widget> _widgetBody = [
-    const HomeScreen(),
+  List<Widget> get _widgetBody => [
+    HomeScreen(onNavigate: _onItemTapped),
     const MahasiswaScreen(),
     const PengujiScreen(),
     const PembimbingScreen(),
   ];
 
+  List<Widget> get _dosenWidgetBody => [
+    const DosenScreen(),
+    const PengaturanScreen(),
+  ];
+
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().currentUser;
+    final isDosen = user?.roles == 'Dosen';
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
 
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: _appBar(user),
-      drawer: _drawer(user),
-      body: _widgetBody[_selectedIndex],
-      bottomNavigationBar: _bottomNavigationBar(),
-
-      // initialRoute: '/home',
-      // routes: {
-      //   '/home': (context) => HomeScreen(),
-      //   '/mahasiswa': (context) => MahasiswaScreen(),
-      //   '/penguji': (context) => PengujiScreen(),
-      //   '/pembimbing': (context) => PembimbingScreen(),
-      // },
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark 
+            ? [const Color(0xFF231557), const Color(0xFF44107A), const Color(0xFFFF1361)]
+            : [const Color(0xFF8EC5FC), const Color(0xFFE0C3FC)],
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        key: _scaffoldKey,
+        appBar: _appBar(user),
+        drawer: _drawer(user),
+        endDrawer: _endDrawer(),
+        body: isDosen
+            ? _dosenWidgetBody[_selectedIndex.clamp(0, _dosenWidgetBody.length - 1)]
+            : _widgetBody[_selectedIndex.clamp(0, _widgetBody.length - 1)],
+        bottomNavigationBar: isDosen
+            ? _bottomNavDosen()
+            : _bottomNavigationBar(),
+      ),
     );
   }
 
@@ -65,8 +86,8 @@ class _MainScreenState extends State<MainScreen> {
 
   Container _bottomNavigationBar() {
     return Container(
-      decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: Colors.black12, width: 1.0))),
+      decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: Theme.of(context).dividerColor, width: 1.0))),
       child: BottomNavigationBar(
         elevation: 30,
         currentIndex: _selectedIndex,
@@ -75,29 +96,29 @@ class _MainScreenState extends State<MainScreen> {
         showSelectedLabels: true,
         showUnselectedLabels: true,
         items: [
-          _botBarItem(icon: "assets/svgs/beranda-icon.svg", label: "Beranda"),
-          _botBarItem(
+          _botBarItem(context: context, icon: "assets/svgs/beranda-icon.svg", label: "Beranda"),
+          _botBarItem(context: context, 
               icon: "assets/svgs/mahasiswa-icon.svg", label: "Mahasiswa"),
-          _botBarItem(icon: "assets/svgs/penguji-icon.svg", label: "Penguji"),
-          _botBarItem(
+          _botBarItem(context: context, icon: "assets/svgs/penguji-icon.svg", label: "Penguji"),
+          _botBarItem(context: context, 
               icon: "assets/svgs/pembimbing-icon.svg", label: "Pembimbing"),
         ],
         useLegacyColorScheme: false,
         selectedFontSize: 12,
         unselectedFontSize: 12,
-        selectedIconTheme: const IconThemeData(
-          color: Colors.black,
+        selectedIconTheme: IconThemeData(
+          color: Theme.of(context).colorScheme.primary,
         ),
-        unselectedIconTheme: const IconThemeData(
-          color: Colors.black26,
+        unselectedIconTheme: IconThemeData(
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
         ),
-        selectedLabelStyle: const TextStyle(
-          color: Colors.black,
+        selectedLabelStyle: TextStyle(
+          color: Theme.of(context).colorScheme.primary,
           fontFamily: "Montserrat-SemiBold",
           letterSpacing: -0.9,
         ),
-        unselectedLabelStyle: const TextStyle(
-          color: Colors.black38,
+        unselectedLabelStyle: TextStyle(
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
           fontFamily: "Montserrat-SemiBold",
           letterSpacing: -0.9,
         ),
@@ -106,28 +127,70 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   BottomNavigationBarItem _botBarItem(
-      {required String icon, required String label}) {
+      {required BuildContext context, required String icon, required String label}) {
     return BottomNavigationBarItem(
         icon: SvgPicture.asset(
           icon,
           width: 33,
-          colorFilter: const ColorFilter.mode(Colors.black38, BlendMode.srcIn),
+          colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38), BlendMode.srcIn),
         ),
         activeIcon: Container(
           width: 70,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
-            color: Colors.purple[50],
+            color: Theme.of(context).brightness == Brightness.dark ? Colors.deepPurple[900] : Colors.purple[50],
           ),
           child: SvgPicture.asset(
             icon,
             width: 33,
-            colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+            colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn),
           ),
         ),
         label: label);
   }
 
+  Container _bottomNavDosen() {
+    return Container(
+      decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: Theme.of(context).dividerColor, width: 1.0))),
+      child: BottomNavigationBar(
+        elevation: 30,
+        currentIndex: _selectedIndex.clamp(0, 1),
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
+        useLegacyColorScheme: false,
+        selectedFontSize: 12,
+        unselectedFontSize: 12,
+        selectedIconTheme: IconThemeData(color: Theme.of(context).colorScheme.primary),
+        unselectedIconTheme: IconThemeData(
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
+        selectedLabelStyle: TextStyle(
+          color: Theme.of(context).colorScheme.primary,
+          fontFamily: "Montserrat-SemiBold",
+          letterSpacing: -0.9,
+        ),
+        unselectedLabelStyle: TextStyle(
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
+          fontFamily: "Montserrat-SemiBold",
+          letterSpacing: -0.9,
+        ),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.school_outlined),
+            activeIcon: Icon(Icons.school_rounded),
+            label: 'Mahasiswa Saya',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings_outlined),
+            activeIcon: Icon(Icons.settings_rounded),
+            label: 'Pengaturan',
+          ),
+        ],
+      ),
+    );
+  }
 
 
 
@@ -138,6 +201,8 @@ class _MainScreenState extends State<MainScreen> {
 
   AppBar _appBar(User? user) {
     return AppBar(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
       leading: Row(
         children: [
           Container(
@@ -157,12 +222,13 @@ class _MainScreenState extends State<MainScreen> {
           Container(
             width: 3.0,
           ),
-          const Text(
+          Text(
             'SIPTATIF',
             style: TextStyle(
               fontFamily: "Montserrat-Bold",
               fontSize: 24.0,
               letterSpacing: -0.9,
+              color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
             ),
           )
         ],
@@ -171,6 +237,39 @@ class _MainScreenState extends State<MainScreen> {
       leadingWidth: 180,
 
       actions: [
+        Consumer<ThemeProvider>(
+          builder: (context, themeProvider, child) {
+            return IconButton(
+              icon: Icon(
+                themeProvider.isDarkMode ? Icons.dark_mode : Icons.light_mode,
+                color: themeProvider.isDarkMode ? Colors.yellow : Colors.black87,
+              ),
+              onPressed: () {
+                themeProvider.toggleTheme();
+              },
+            );
+          },
+        ),
+        Consumer<NotifikasiProvider>(
+          builder: (context, notifProvider, child) {
+            return IconButton(
+              icon: Badge(
+                isLabelVisible: notifProvider.unreadCount > 0,
+                label: Text(notifProvider.unreadCount.toString()),
+                child: Icon(
+                  Icons.notifications,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black87,
+                ),
+              ),
+              onPressed: () {
+                _scaffoldKey.currentState?.openEndDrawer();
+                notifProvider.markAllAsRead();
+              },
+            );
+          },
+        ),
         InkWell(
           onLongPress: () async {
             await showDialog(
@@ -247,13 +346,18 @@ class _MainScreenState extends State<MainScreen> {
 
   Drawer _drawer(User? user) {
     return Drawer(
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-            topRight: Radius.circular(0), bottomRight: Radius.circular(0)),
-      ),
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      child: ClipRRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            color: Theme.of(context).brightness == Brightness.light
+                ? Colors.white.withValues(alpha: 0.6)
+                : Colors.black.withValues(alpha: 0.6),
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 14, 14, 0),
             child: SizedBox(
@@ -296,16 +400,16 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                     Text(
                       user?.fullName ?? "",
-                      style: const TextStyle(
-                          color: Colors.black,
+                      style: TextStyle(
+                          color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
                           letterSpacing: -0.5),
                     ),
                     Text(
                       user?.email ?? "",
-                      style: const TextStyle(
-                          color: Colors.black,
+                      style: TextStyle(
+                          color: Theme.of(context).brightness == Brightness.dark ? Colors.white70 : Colors.black87,
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                           letterSpacing: -0.5),
@@ -344,54 +448,88 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
           ),
-          ListTile(
-            leading: SvgPicture.asset(
-              "assets/svgs/beranda-icon.svg",
-              width: 25,
+          if (user?.roles != 'Dosen') ...[
+            ListTile(
+              leading: SvgPicture.asset(
+                "assets/svgs/beranda-icon.svg",
+                width: 25,
+              ),
+              title: const Text('Beranda'),
+              onTap: () => {
+                _onItemTapped(0),
+                _scaffoldKey.currentState?.closeDrawer(),
+              },
             ),
-            title: const Text('Beranda'),
-            onTap: () => {
-              _onItemTapped(0),
-              _scaffoldKey.currentState?.closeDrawer(),
+            ListTile(
+              leading: SvgPicture.asset(
+                "assets/svgs/mahasiswa-icon.svg",
+                width: 25,
+              ),
+              title: const Text('Mahasiswa'),
+              onTap: () => {
+                _onItemTapped(1),
+                _scaffoldKey.currentState?.closeDrawer(),
+              },
+            ),
+            ListTile(
+              leading: SvgPicture.asset(
+                "assets/svgs/penguji-icon.svg",
+                width: 25,
+              ),
+              title: const Text('Penguji'),
+              onTap: () => {
+                _onItemTapped(2),
+                _scaffoldKey.currentState?.closeDrawer(),
+              },
+            ),
+            ListTile(
+              leading: SvgPicture.asset(
+                "assets/svgs/pembimbing-icon.svg",
+                width: 25,
+              ),
+              title: const Text('Pembimbing'),
+              onTap: () => {
+                _onItemTapped(3),
+                _scaffoldKey.currentState?.closeDrawer(),
+              },
+            ),
+          ],
+          const Divider(),
+          ListTile(
+            leading: Icon(Icons.settings, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87),
+            title: Text('Pengaturan', style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black)),
+            onTap: () {
+              _scaffoldKey.currentState?.closeDrawer();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const PengaturanScreen()),
+              );
             },
           ),
           ListTile(
-            leading: SvgPicture.asset(
-              "assets/svgs/mahasiswa-icon.svg",
-              width: 25,
-            ),
-            title: const Text('Mahasiswa'),
-            onTap: () => {
-              _onItemTapped(1),
-              _scaffoldKey.currentState?.closeDrawer(),
-            },
-          ),
-          ListTile(
-            leading: SvgPicture.asset(
-              "assets/svgs/penguji-icon.svg",
-              width: 25,
-            ),
-            title: const Text('Penguji'),
-            onTap: () => {
-              _onItemTapped(2),
-              _scaffoldKey.currentState?.closeDrawer(),
-            },
-          ),
-          ListTile(
-            leading: SvgPicture.asset(
-              "assets/svgs/pembimbing-icon.svg",
-              width: 25,
-            ),
-            title: const Text('Pembimbing'),
-            onTap: () => {
-              _onItemTapped(3),
-              _scaffoldKey.currentState?.closeDrawer(),
+            leading: Icon(Icons.info_outline, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87),
+            title: Text('Tentang Aplikasi', style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black)),
+            onTap: () {
+              _scaffoldKey.currentState?.closeDrawer();
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('SIPTATIF v1.0'),
+                  content: const Text('Sistem Informasi Penjadwalan Tugas Akhir Teknik Informatika (SIPTATIF).\n\nDikembangkan untuk Universitas Pamulang.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Tutup'),
+                    ),
+                  ],
+                ),
+              );
             },
           ),
           Builder(builder: (context) {
             return ListTile(
-              leading: const Icon(Icons.exit_to_app),
-              title: const Text('Logout'),
+              leading: const Icon(Icons.exit_to_app, color: Colors.red),
+              title: const Text('Logout', style: TextStyle(color: Colors.red)),
               onTap: () => {
                 showDialog<String>(
                   context: context,
@@ -437,6 +575,88 @@ class _MainScreenState extends State<MainScreen> {
             );
           }),
         ],
+      ),
+    ))));
+  }
+
+  Drawer _endDrawer() {
+    return Drawer(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      child: ClipRRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            color: Theme.of(context).brightness == Brightness.light
+                ? Colors.white.withValues(alpha: 0.6)
+                : Colors.black.withValues(alpha: 0.6),
+            child: SafeArea(
+              child: Consumer<NotifikasiProvider>(
+                builder: (context, notifProvider, child) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text(
+                    "Notifikasi",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ),
+                const Divider(height: 1),
+                Expanded(
+                  child: ListView.separated(
+                    itemCount: notifProvider.notifikasiList.length,
+                    separatorBuilder: (context, index) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final notif = notifProvider.notifikasiList[index];
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Colors.blue.shade100,
+                          child: const Icon(Icons.notifications_active, color: Colors.blue),
+                        ),
+                        title: Text(
+                          notif.judul,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 4),
+                            Text(notif.pesan),
+                            const SizedBox(height: 8),
+                            Text(
+                              notif.waktu,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        isThreeLine: true,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        onTap: () {
+                          _scaffoldKey.currentState?.closeEndDrawer();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Membuka detail notifikasi: ${notif.judul}')),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+            ),
+          ),
+        ),
       ),
     );
   }

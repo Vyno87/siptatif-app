@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:siptatif_app/screens/beranda_screen.dart';
+import 'package:siptatif_app/widgets/glass_card.dart';
 
 class BerandaCard extends StatelessWidget {
   final BerandaObject berandaData;
+  final VoidCallback? onTapDetail;
 
-  const BerandaCard({super.key, required this.berandaData});
+  const BerandaCard({super.key, required this.berandaData, this.onTapDetail});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-        elevation: 0,
-        color: Colors.grey[300],
+    return GlassCard(
         margin: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
         child: Padding(
           padding: const EdgeInsets.all(12.0),
@@ -24,13 +24,13 @@ class BerandaCard extends StatelessWidget {
                   Container(
                     padding:
                         const EdgeInsets.symmetric(vertical: 5, horizontal: 12),
-                    decoration: const BoxDecoration(color: Colors.black),
+                    decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
                     child: Text(
                       berandaData.nama,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: "Montserrat-SemiBold",
                         fontSize: 23.0,
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     ),
                   ),
@@ -47,9 +47,10 @@ class BerandaCard extends StatelessWidget {
                   ),
                   Text(
                     "${berandaData.terdaftar} ${berandaData.nama == 'Mahasiswa' ? 'orang mendaftar' : 'dosen terdaftar'} ",
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontFamily: "Montserrat-SemiBold",
                         fontSize: 27,
+                        color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
                         letterSpacing: -2,
                         decoration: TextDecoration.underline),
                   ),
@@ -62,9 +63,9 @@ class BerandaCard extends StatelessWidget {
                 children: [
                   Text(
                     "${berandaData.kuota} ${berandaData.nama == 'Mahasiswa' ? 'telah disetujui' : 'kuota masih tersedia'}.",
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 16.0,
-                        color: Colors.black,
+                        color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black,
                         letterSpacing: -0.4,
                         fontWeight: FontWeight.w800),
                   ),
@@ -88,14 +89,15 @@ class BerandaCard extends StatelessWidget {
                     berandaData.nama == 'Mahasiswa'
                         ? '*data perbulan ini'
                         : '*data keseluruhan',
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontStyle: FontStyle.italic,
+                        color: Theme.of(context).brightness == Brightness.dark ? Colors.white70 : Colors.black87,
                         letterSpacing: -0.7,
                         fontSize: 14),
                   ),
                   const Spacer(),
                   InkWell(
-                    onTap: () {},
+                    onTap: onTapDetail,
                     child: const Row(
                       children: [
                         Text(

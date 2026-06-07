@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:siptatif_app/datas/models/mahasiswa.dart';
+import 'package:provider/provider.dart';
+import 'package:siptatif_app/providers/mahasiswa_provider.dart';
+import 'package:siptatif_app/providers/notifikasi_provider.dart';
+import 'package:siptatif_app/widgets/glass_card.dart';
 
 class MahasiswaCard extends StatelessWidget {
   final Mahasiswa mhs;
@@ -38,10 +42,9 @@ class MahasiswaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-        elevation: 0,
-        color: _warnaStatusCard(mhs.statusBerkas),
-        margin: const EdgeInsets.fromLTRB(0, 16.0, 0, 0),
+    return GlassCard(
+        color: _warnaStatusCard(mhs.statusBerkas)?.withValues(alpha: 0.5),
+        margin: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Column(
@@ -52,16 +55,22 @@ class MahasiswaCard extends StatelessWidget {
                 children: [
                   _generateRowDataPoint(
                       Icons.calendar_month_rounded, mhs.tglDaftar),
-                  _generateRowDataPoint(Icons.account_circle_rounded, mhs.nama),
+                  Hero(
+                    tag: 'mhs-nama-${mhs.nim}',
+                    child: Material(
+                      type: MaterialType.transparency,
+                      child: _generateRowDataPoint(Icons.account_circle_rounded, mhs.nama),
+                    ),
+                  ),
                   _generateRowDataPoint(
                       Icons.calendar_view_day_rounded, mhs.nim),
                   _generateRowDataPoint(Icons.email_rounded, mhs.email),
                   const SizedBox(
                     height: 4,
                   ),
-                  const Divider(
+                  Divider(
                     height: 1,
-                    color: Colors.black,
+                    color: Theme.of(context).dividerColor,
                     thickness: 0.8,
                   ),
                   const SizedBox(
@@ -136,7 +145,15 @@ class MahasiswaCard extends StatelessWidget {
                                     ),
                                     TextButton(
                                       onPressed: () {
+                                        context.read<MahasiswaProvider>().hapusMahasiswa(mhs);
+                                        context.read<NotifikasiProvider>().tambahNotifikasi(
+                                          "Data Pengajuan Dihapus",
+                                          "Pengajuan TA atas nama ${mhs.nama} telah dihapus dari sistem."
+                                        );
                                         Navigator.pop(context);
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(content: Text('Data berhasil dihapus secara real-time!')),
+                                        );
                                       },
                                       child: Container(
                                           padding: const EdgeInsets.all(15),
