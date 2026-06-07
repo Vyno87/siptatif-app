@@ -64,6 +64,15 @@
       "profilePict": "assets/img/default-profile.png",
       "roles": "Dosen",
       "nidn": "0002"
+    },
+    {
+      "id": "u4",
+      "email": "farhan@siptatif.com",
+      "password": "mhs",
+      "fullName": "Farhan Aulia Pratama",
+      "profilePict": "assets/img/default-profile.png",
+      "roles": "Mahasiswa",
+      "nimNidn": "12345678"
     }
   ],
   "notifikasi": [
@@ -88,5 +97,6 @@
       "waktu": "Kemarin",
       "isRead": true
     }
-  ]
+  ],
+  "logbooks": []
 }

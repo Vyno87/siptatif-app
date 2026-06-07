@@ -4,8 +4,11 @@ import 'package:siptatif_app/datas/models/penguji.dart';
 import 'package:provider/provider.dart';
 import 'package:siptatif_app/providers/penguji_provider.dart';
 import 'package:siptatif_app/providers/mahasiswa_provider.dart';
+import 'package:siptatif_app/providers/logbook_provider.dart';
+import 'package:siptatif_app/providers/auth_provider.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 import 'package:siptatif_app/screens/pdf_viewer_screen.dart';
+import 'package:siptatif_app/datas/models/logbook.dart';
 
 class MahasiswaDetailScreen extends StatefulWidget {
   const MahasiswaDetailScreen({super.key});
@@ -51,7 +54,7 @@ class _MahasiswaDetailScreenState extends State<MahasiswaDetailScreen> {
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments as Mahasiswa;
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           bottom: const TabBar(
@@ -65,6 +68,9 @@ class _MahasiswaDetailScreenState extends State<MahasiswaDetailScreen> {
               Tab(
                 text: "Input Dos. Penguji",
               ),
+              Tab(
+                text: "Logbook Bimbingan",
+              ),
             ],
           ),
           title: const Text('Detail Pengajuan Mhs'),
@@ -75,9 +81,149 @@ class _MahasiswaDetailScreenState extends State<MahasiswaDetailScreen> {
             contentDetail(args),
             statusTimeline(args),
             inputPenguji(context, args),
+            _logbookTab(context, args),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _logbookTab(BuildContext context, Mahasiswa args) {
+    final logbookProvider = context.watch<LogbookProvider>();
+    final user = context.watch<AuthProvider>().currentUser;
+    final isDosen = user?.roles == 'Dosen';
+
+    final myLogbooks = logbookProvider.listLogbook.where((l) => l.mahasiswaId == args.nim).toList();
+    myLogbooks.sort((a, b) => b.tanggal.compareTo(a.tanggal));
+
+    if (myLogbooks.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.history_edu_rounded, size: 80, color: Colors.grey.withValues(alpha: 0.5)),
+            const SizedBox(height: 16),
+            const Text(
+              'Mahasiswa ini belum mengisi logbook.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: myLogbooks.length,
+      itemBuilder: (context, index) {
+        final logbook = myLogbooks[index];
+        final isFirst = index == 0;
+        final isLast = index == myLogbooks.length - 1;
+
+        Color statusColor = Colors.grey;
+        if (logbook.status == 'Disetujui') statusColor = Colors.green;
+        if (logbook.status == 'Direvisi') statusColor = Colors.orange;
+
+        return TimelineTile(
+          isFirst: isFirst,
+          isLast: isLast,
+          indicatorStyle: IndicatorStyle(
+            width: 20,
+            color: statusColor,
+          ),
+          beforeLineStyle: LineStyle(color: statusColor.withValues(alpha: 0.5)),
+          endChild: Card(
+            margin: const EdgeInsets.only(left: 16, bottom: 16),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(logbook.tanggal, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text(logbook.status, style: TextStyle(color: statusColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(logbook.materiProgres),
+                  const SizedBox(height: 8),
+                  if (logbook.catatanDosen.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      color: Colors.orange.withValues(alpha: 0.1),
+                      child: Text('Catatan Dosen: ${logbook.catatanDosen}'),
+                    ),
+                  if (isDosen && logbook.status == 'Menunggu Validasi')
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: ElevatedButton.icon(
+                        onPressed: () => _showValidasiDialog(context, logbook),
+                        icon: const Icon(Icons.check_circle_outline),
+                        label: const Text('Validasi Logbook'),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showValidasiDialog(BuildContext context, Logbook logbook) {
+    final _catatanEvalController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Validasi Logbook'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Progres: ${logbook.materiProgres}'),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _catatanEvalController,
+                decoration: const InputDecoration(
+                  labelText: 'Catatan Evaluasi',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Batal'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                logbook.status = 'Direvisi';
+                logbook.catatanDosen = _catatanEvalController.text;
+                await context.read<LogbookProvider>().updateLogbook(logbook);
+                if (context.mounted) Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+              child: const Text('Revisi'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                logbook.status = 'Disetujui';
+                logbook.catatanDosen = _catatanEvalController.text;
+                await context.read<LogbookProvider>().updateLogbook(logbook);
+                if (context.mounted) Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+              child: const Text('Setujui'),
+            ),
+          ],
+        );
+      },
     );
   }
 

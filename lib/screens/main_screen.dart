@@ -4,6 +4,7 @@ import 'package:siptatif_app/dialogs/preview_profile_pict.dart';
 
 import 'package:siptatif_app/screens/beranda_screen.dart';
 import 'package:siptatif_app/screens/dosen_screen.dart';
+import 'package:siptatif_app/screens/logbook_mahasiswa_screen.dart';
 import 'package:siptatif_app/screens/mahasiswa_screen.dart';
 import 'package:siptatif_app/screens/penguji_screen.dart';
 import 'package:siptatif_app/screens/pembimbing_screen.dart';
@@ -38,11 +39,35 @@ class _MainScreenState extends State<MainScreen> {
     const PengaturanScreen(),
   ];
 
+  List<Widget> get _mahasiswaWidgetBody => [
+    const LogbookMahasiswaScreen(),
+    const PengaturanScreen(),
+  ];
+
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().currentUser;
     final isDosen = user?.roles == 'Dosen';
+    final isMahasiswa = user?.roles == 'Mahasiswa';
     final isDark = context.watch<ThemeProvider>().isDarkMode;
+
+    Widget bodyWidget;
+    if (isDosen) {
+      bodyWidget = _dosenWidgetBody[_selectedIndex.clamp(0, _dosenWidgetBody.length - 1)];
+    } else if (isMahasiswa) {
+      bodyWidget = _mahasiswaWidgetBody[_selectedIndex.clamp(0, _mahasiswaWidgetBody.length - 1)];
+    } else {
+      bodyWidget = _widgetBody[_selectedIndex.clamp(0, _widgetBody.length - 1)];
+    }
+
+    Widget bottomNavWidget;
+    if (isDosen) {
+      bottomNavWidget = _bottomNavDosen();
+    } else if (isMahasiswa) {
+      bottomNavWidget = _bottomNavMahasiswa();
+    } else {
+      bottomNavWidget = _bottomNavigationBar();
+    }
 
     return Container(
       decoration: BoxDecoration(
@@ -60,12 +85,8 @@ class _MainScreenState extends State<MainScreen> {
         appBar: _appBar(user),
         drawer: _drawer(user),
         endDrawer: _endDrawer(),
-        body: isDosen
-            ? _dosenWidgetBody[_selectedIndex.clamp(0, _dosenWidgetBody.length - 1)]
-            : _widgetBody[_selectedIndex.clamp(0, _widgetBody.length - 1)],
-        bottomNavigationBar: isDosen
-            ? _bottomNavDosen()
-            : _bottomNavigationBar(),
+        body: bodyWidget,
+        bottomNavigationBar: bottomNavWidget,
       ),
     );
   }
@@ -192,6 +213,48 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
+  Container _bottomNavMahasiswa() {
+    return Container(
+      decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: Theme.of(context).dividerColor, width: 1.0))),
+      child: BottomNavigationBar(
+        elevation: 30,
+        currentIndex: _selectedIndex.clamp(0, 1),
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
+        useLegacyColorScheme: false,
+        selectedFontSize: 12,
+        unselectedFontSize: 12,
+        selectedIconTheme: IconThemeData(color: Theme.of(context).colorScheme.primary),
+        unselectedIconTheme: IconThemeData(
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
+        selectedLabelStyle: TextStyle(
+          color: Theme.of(context).colorScheme.primary,
+          fontFamily: "Montserrat-SemiBold",
+          letterSpacing: -0.9,
+        ),
+        unselectedLabelStyle: TextStyle(
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
+          fontFamily: "Montserrat-SemiBold",
+          letterSpacing: -0.9,
+        ),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history_edu_outlined),
+            activeIcon: Icon(Icons.history_edu_rounded),
+            label: 'Logbook Saya',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings_outlined),
+            activeIcon: Icon(Icons.settings_rounded),
+            label: 'Pengaturan',
+          ),
+        ],
+      ),
+    );
+  }
 
 
 
