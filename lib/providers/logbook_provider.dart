@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:siptatif_app/datas/models/logbook.dart';
-import 'package:siptatif_app/services/api_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LogbookProvider extends ChangeNotifier {
   List<Logbook> _listLogbook = [];
@@ -21,8 +21,12 @@ class LogbookProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final List<dynamic> logbooks = await ApiService.get('logbooks');
-      _listLogbook = logbooks.map((e) => Logbook.fromJson(e)).toList();
+      final QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('logbooks').get();
+      _listLogbook = snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['id'] = doc.id;
+        return Logbook.fromJson(data);
+      }).toList();
     } catch (e) {
       _errorMessage = 'Gagal memuat data logbook: $e';
     } finally {
@@ -37,8 +41,9 @@ class LogbookProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await ApiService.post('logbooks', logbook.toJson());
-      _listLogbook.add(Logbook.fromJson(response));
+      final docRef = await FirebaseFirestore.instance.collection('logbooks').add(logbook.toJson());
+      logbook.id = docRef.id;
+      _listLogbook.add(logbook);
       notifyListeners();
       return true;
     } catch (e) {
@@ -58,7 +63,7 @@ class LogbookProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await ApiService.put('logbooks/${logbook.id}', logbook.toJson());
+      await FirebaseFirestore.instance.collection('logbooks').doc(logbook.id).update(logbook.toJson());
       final index = _listLogbook.indexWhere((l) => l.id == logbook.id);
       if (index != -1) {
         _listLogbook[index] = logbook;

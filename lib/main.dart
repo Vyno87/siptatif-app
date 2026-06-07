@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:siptatif_app/utils/app_theme.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:siptatif_app/screens/login_screen.dart';
 import 'package:siptatif_app/screens/lupa_password_screen.dart';
 import 'package:siptatif_app/screens/mahasiswa_detail_screen.dart';
@@ -115,14 +115,8 @@ class _MainAppState extends State<MainApp> {
             title: "SIPTATIF Mobile",
             debugShowCheckedModeBanner: false,
             themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-            theme: ThemeData(
-              brightness: Brightness.light,
-              textTheme: GoogleFonts.montserratTextTheme(),
-            ),
-            darkTheme: ThemeData(
-              brightness: Brightness.dark,
-              textTheme: GoogleFonts.montserratTextTheme(ThemeData.dark().textTheme),
-            ),
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
             home: const AuthWrapper(),
           );
         },

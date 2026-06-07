@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'dart:ui';
 
 class PreviewProfilePictDialog extends StatelessWidget {
   final String imgFile;
@@ -7,17 +9,48 @@ class PreviewProfilePictDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    ImageProvider? imageProvider;
+    if (imgFile.isNotEmpty) {
+      if (imgFile.startsWith('http')) {
+        imageProvider = NetworkImage(imgFile);
+      } else {
+        imageProvider = AssetImage(imgFile);
+      }
+    }
+
     return Dialog(
-      child: Container(
-        width: 400,
-        height: 400,
-        decoration: imgFile.isNotEmpty
-            ? BoxDecoration(
-                image: DecorationImage(
-                    image: ExactAssetImage(imgFile), fit: BoxFit.cover))
-            : const BoxDecoration(color: Colors.grey),
-        child: imgFile.isEmpty ? const Center(child: Icon(Icons.person, size: 100, color: Colors.white)) : null,
-      ),
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      child: Center(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  width: 1.5,
+                ),
+                image: imageProvider != null
+                    ? DecorationImage(
+                        image: imageProvider,
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
+              child: imgFile.isEmpty
+                  ? const Center(
+                      child: Icon(Icons.person, size: 100, color: Colors.white70))
+                  : null,
+            ),
+          ),
+        ),
+      ).animate().scale(duration: 400.ms, curve: Curves.easeOutBack).fade(duration: 400.ms),
     );
   }
 }

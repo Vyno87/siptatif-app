@@ -6,6 +6,7 @@ import 'package:siptatif_app/providers/pembimbing_provider.dart';
 import 'package:siptatif_app/providers/penguji_provider.dart';
 import 'package:siptatif_app/widgets/beranda_card.dart';
 import 'package:siptatif_app/services/pdf_service.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class BerandaObject {
   String nama;
@@ -173,33 +174,33 @@ class _HomeScreenState extends State<HomeScreen> {
                 .toList(),
           ),
           const SizedBox(height: 30),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton.icon(
-                onPressed: () async {
-                  await PdfService.exportLaporanSidang(mahasiswaProvider.listMahasiswa);
-                },
-                icon: const Icon(Icons.picture_as_pdf, color: Colors.white),
-                label: const Text(
-                  "Export Laporan Sidang (PDF)",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    await PdfService.exportLaporanSidang(mahasiswaProvider.listMahasiswa);
+                  },
+                  icon: const Icon(Icons.picture_as_pdf, color: Colors.white),
+                  label: const Text(
+                    "Export Laporan Sidang (PDF)",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
-                  elevation: 5,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 5,
+                  ),
                 ),
               ),
-            ),
-          ),
-          const SizedBox(height: 20),
-        ],
-      ),
+            ).animate().fade(delay: 500.ms).slideY(begin: 0.5, end: 0),
+            const SizedBox(height: 20),
+          ],
+        ).animate().fadeIn(duration: 500.ms),
     );
   }
 

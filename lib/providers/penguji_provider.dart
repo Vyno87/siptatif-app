@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:siptatif_app/datas/models/penguji.dart';
-import 'package:siptatif_app/services/api_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PengujiProvider extends ChangeNotifier {
   List<Penguji> _semuaPenguji = [];
@@ -20,8 +20,12 @@ class PengujiProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final List<dynamic> data = await ApiService.get('penguji');
-      _semuaPenguji = data.map((json) => Penguji.fromJson(json)).toList();
+      final QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('penguji').get();
+      _semuaPenguji = snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['id'] = doc.id;
+        return Penguji.fromJson(data);
+      }).toList();
       _displayedPenguji = List.from(_semuaPenguji);
       if (_searchKeyword.isNotEmpty) {
         runFilter(_searchKeyword);
@@ -52,10 +56,10 @@ class PengujiProvider extends ChangeNotifier {
 
   Future<void> tambahPenguji(Penguji p) async {
     try {
-      final response = await ApiService.post('penguji', p.toJson());
-      final newPenguji = Penguji.fromJson(response);
-      _semuaPenguji.add(newPenguji);
-      _displayedPenguji.add(newPenguji);
+      final docRef = await FirebaseFirestore.instance.collection('penguji').add(p.toJson());
+      p.id = docRef.id;
+      _semuaPenguji.add(p);
+      _displayedPenguji.add(p);
       notifyListeners();
     } catch (e) {
       throw Exception('Gagal menambah penguji');
@@ -66,14 +70,13 @@ class PengujiProvider extends ChangeNotifier {
     if (oldP.id == null) return;
     newP.id = oldP.id;
     try {
-      final response = await ApiService.put('penguji/${newP.id}', newP.toJson());
-      final updated = Penguji.fromJson(response);
+      await FirebaseFirestore.instance.collection('penguji').doc(newP.id).update(newP.toJson());
       
-      final indexAll = _semuaPenguji.indexWhere((item) => item.id == newP.id);
-      if (indexAll != -1) _semuaPenguji[indexAll] = updated;
+      final idxSemua = _semuaPenguji.indexWhere((item) => item.id == newP.id);
+      if (idxSemua != -1) _semuaPenguji[idxSemua] = newP;
       
-      final indexDisp = _displayedPenguji.indexWhere((item) => item.id == newP.id);
-      if (indexDisp != -1) _displayedPenguji[indexDisp] = updated;
+      final idxDisplay = _displayedPenguji.indexWhere((item) => item.id == newP.id);
+      if (idxDisplay != -1) _displayedPenguji[idxDisplay] = newP;
       
       notifyListeners();
     } catch (e) {
@@ -84,7 +87,7 @@ class PengujiProvider extends ChangeNotifier {
   Future<void> hapusPenguji(Penguji p) async {
     if (p.id == null) return;
     try {
-      await ApiService.delete('penguji/${p.id}');
+      await FirebaseFirestore.instance.collection('penguji').doc(p.id).delete();
       _semuaPenguji.removeWhere((item) => item.id == p.id);
       _displayedPenguji.removeWhere((item) => item.id == p.id);
       notifyListeners();

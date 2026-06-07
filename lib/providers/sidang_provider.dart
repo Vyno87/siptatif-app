@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:siptatif_app/datas/models/sidang.dart';
 import 'package:siptatif_app/datas/models/mahasiswa.dart';
-import 'package:siptatif_app/services/api_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SidangProvider extends ChangeNotifier {
   List<Sidang> _listSidang = [];
@@ -22,8 +22,12 @@ class SidangProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final List<dynamic> data = await ApiService.get('sidang');
-      _listSidang = data.map((e) => Sidang.fromJson(e)).toList();
+      final QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('sidang').get();
+      _listSidang = snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['id'] = doc.id;
+        return Sidang.fromJson(data);
+      }).toList();
     } catch (e) {
       _errorMessage = 'Gagal memuat data sidang: $e';
     } finally {
@@ -38,8 +42,9 @@ class SidangProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await ApiService.post('sidang', sidang.toJson());
-      _listSidang.add(Sidang.fromJson(response));
+      final docRef = await FirebaseFirestore.instance.collection('sidang').add(sidang.toJson());
+      sidang.id = docRef.id;
+      _listSidang.add(sidang);
       notifyListeners();
       return true;
     } catch (e) {
@@ -59,7 +64,7 @@ class SidangProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await ApiService.put('sidang/${sidang.id}', sidang.toJson());
+      await FirebaseFirestore.instance.collection('sidang').doc(sidang.id).update(sidang.toJson());
       final index = _listSidang.indexWhere((s) => s.id == sidang.id);
       if (index != -1) {
         _listSidang[index] = sidang;

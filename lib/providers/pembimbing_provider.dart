@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:siptatif_app/datas/models/pembimbing.dart';
-import 'package:siptatif_app/services/api_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PembimbingProvider extends ChangeNotifier {
   List<Pembimbing> _semuaPembimbing = [];
@@ -20,8 +20,12 @@ class PembimbingProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final List<dynamic> data = await ApiService.get('pembimbing');
-      _semuaPembimbing = data.map((json) => Pembimbing.fromJson(json)).toList();
+      final QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('pembimbing').get();
+      _semuaPembimbing = snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['id'] = doc.id;
+        return Pembimbing.fromJson(data);
+      }).toList();
       _displayedPembimbing = List.from(_semuaPembimbing);
       if (_searchKeyword.isNotEmpty) {
         runFilter(_searchKeyword);
@@ -52,10 +56,10 @@ class PembimbingProvider extends ChangeNotifier {
 
   Future<void> tambahPembimbing(Pembimbing p) async {
     try {
-      final response = await ApiService.post('pembimbing', p.toJson());
-      final newPembimbing = Pembimbing.fromJson(response);
-      _semuaPembimbing.add(newPembimbing);
-      _displayedPembimbing.add(newPembimbing);
+      final docRef = await FirebaseFirestore.instance.collection('pembimbing').add(p.toJson());
+      p.id = docRef.id;
+      _semuaPembimbing.add(p);
+      _displayedPembimbing.add(p);
       notifyListeners();
     } catch (e) {
       throw Exception('Gagal menambah pembimbing');
@@ -66,14 +70,13 @@ class PembimbingProvider extends ChangeNotifier {
     if (oldP.id == null) return;
     newP.id = oldP.id;
     try {
-      final response = await ApiService.put('pembimbing/${newP.id}', newP.toJson());
-      final updated = Pembimbing.fromJson(response);
+      await FirebaseFirestore.instance.collection('pembimbing').doc(newP.id).update(newP.toJson());
       
-      final indexAll = _semuaPembimbing.indexWhere((item) => item.id == newP.id);
-      if (indexAll != -1) _semuaPembimbing[indexAll] = updated;
+      final idxSemua = _semuaPembimbing.indexWhere((item) => item.id == newP.id);
+      if (idxSemua != -1) _semuaPembimbing[idxSemua] = newP;
       
-      final indexDisp = _displayedPembimbing.indexWhere((item) => item.id == newP.id);
-      if (indexDisp != -1) _displayedPembimbing[indexDisp] = updated;
+      final idxDisplay = _displayedPembimbing.indexWhere((item) => item.id == newP.id);
+      if (idxDisplay != -1) _displayedPembimbing[idxDisplay] = newP;
       
       notifyListeners();
     } catch (e) {
@@ -84,7 +87,7 @@ class PembimbingProvider extends ChangeNotifier {
   Future<void> hapusPembimbing(Pembimbing p) async {
     if (p.id == null) return;
     try {
-      await ApiService.delete('pembimbing/${p.id}');
+      await FirebaseFirestore.instance.collection('pembimbing').doc(p.id).delete();
       _semuaPembimbing.removeWhere((item) => item.id == p.id);
       _displayedPembimbing.removeWhere((item) => item.id == p.id);
       notifyListeners();

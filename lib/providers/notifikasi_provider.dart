@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:siptatif_app/datas/models/notifikasi.dart';
-import 'package:siptatif_app/services/api_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class NotifikasiProvider extends ChangeNotifier {
   List<Notifikasi> _notifikasiList = [];
@@ -21,8 +21,12 @@ class NotifikasiProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final List<dynamic> data = await ApiService.get('notifikasi');
-      _notifikasiList = data.map((json) => Notifikasi.fromJson(json)).toList();
+      final QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('notifikasi').get();
+      _notifikasiList = snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['id'] = doc.id;
+        return Notifikasi.fromJson(data);
+      }).toList();
       // Reverse so newest is first
       _notifikasiList = _notifikasiList.reversed.toList();
     } catch (e) {
@@ -41,7 +45,7 @@ class NotifikasiProvider extends ChangeNotifier {
     for (var n in _notifikasiList) {
       if (!n.isRead) {
         n.isRead = true;
-        await ApiService.put('notifikasi/${n.id}', n.toJson());
+        await FirebaseFirestore.instance.collection('notifikasi').doc(n.id).update(n.toJson());
       }
     }
     notifyListeners();
@@ -60,8 +64,9 @@ class NotifikasiProvider extends ChangeNotifier {
     );
 
     try {
-      final response = await ApiService.post('notifikasi', newNotif.toJson());
-      _notifikasiList.insert(0, Notifikasi.fromJson(response));
+      final docRef = await FirebaseFirestore.instance.collection('notifikasi').add(newNotif.toJson());
+      newNotif.id = docRef.id;
+      _notifikasiList.insert(0, newNotif); // Insert at top
       notifyListeners();
     } catch (e) {
       _errorMessage = 'Gagal menambah notifikasi: $e';

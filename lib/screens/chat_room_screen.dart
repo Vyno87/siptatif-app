@@ -6,6 +6,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:siptatif_app/utils/app_theme.dart';
+import 'dart:ui';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class ChatRoomScreen extends StatefulWidget {
   final String contactId;
@@ -99,27 +102,29 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     final chats = chatProvider.getChatsBetween(widget.currentUserId, widget.contactId);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            const CircleAvatar(
-              backgroundColor: Colors.white24,
-              radius: 16,
-              child: Icon(Icons.person, color: Colors.white, size: 20),
-            ),
-            const SizedBox(width: 10),
-            Expanded(child: Text(widget.contactName, style: const TextStyle(fontSize: 16))),
-          ],
-        ),
-        backgroundColor: Colors.blue[800],
-        foregroundColor: Colors.white,
+    return Container(
+      decoration: BoxDecoration(
+        gradient: isDark ? AppTheme.darkGlassGradient : AppTheme.neonGradient,
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF0F2F5),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: Row(
+            children: [
+              const CircleAvatar(
+                backgroundColor: Colors.white24,
+                radius: 16,
+                child: Icon(Icons.person, color: Colors.white, size: 20),
+              ),
+              const SizedBox(width: 10),
+              Expanded(child: Text(widget.contactName, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
+            ],
+          ),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          foregroundColor: isDark ? Colors.white : Colors.black87,
         ),
-        child: Column(
+        body: Column(
           children: [
             Expanded(
               child: ListView.builder(
@@ -134,120 +139,143 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                   return Align(
                     alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
                     child: Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: isMe ? Colors.blue[800] : (isDark ? Colors.grey[800] : Colors.white),
-                        borderRadius: BorderRadius.only(
-                          topLeft: const Radius.circular(16),
-                          topRight: const Radius.circular(16),
-                          bottomLeft: Radius.circular(isMe ? 16 : 0),
-                          bottomRight: Radius.circular(isMe ? 0 : 16),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
-                            blurRadius: 5,
-                            offset: const Offset(0, 2),
-                          )
-                        ],
+                      margin: const EdgeInsets.only(bottom: 12),
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.75,
                       ),
-                      child: Column(
-                        crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            chat.message,
-                            style: TextStyle(
-                              color: isMe ? Colors.white : (isDark ? Colors.white : Colors.black87),
-                              fontSize: 15,
-                            ),
-                          ),
-                          if (chat.fileUrl != null) ...[
-                            const SizedBox(height: 8),
-                            ElevatedButton.icon(
-                              onPressed: () async {
-                                final uri = Uri.parse(chat.fileUrl!);
-                                if (await canLaunchUrl(uri)) {
-                                  await launchUrl(uri, mode: LaunchMode.externalApplication);
-                                }
-                              },
-                              icon: Icon(Icons.download, size: 16, color: isMe ? Colors.blue[800] : Colors.white),
-                              label: Text("Unduh File", style: TextStyle(color: isMe ? Colors.blue[800] : Colors.white, fontSize: 12)),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: isMe ? Colors.white : Colors.blue[800],
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                minimumSize: const Size(0, 30),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.only(
+                          topLeft: const Radius.circular(20),
+                          topRight: const Radius.circular(20),
+                          bottomLeft: Radius.circular(isMe ? 20 : 0),
+                          bottomRight: Radius.circular(isMe ? 0 : 20),
+                        ),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: isMe 
+                                  ? AppTheme.primaryPurple.withValues(alpha: 0.7) 
+                                  : (isDark ? Colors.grey[800]!.withValues(alpha: 0.6) : Colors.white.withValues(alpha: 0.7)),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                width: 1,
                               ),
-                            )
-                          ],
-                          const SizedBox(height: 4),
-                          Text(
-                            time,
-                            style: TextStyle(
-                              color: isMe ? Colors.white70 : Colors.grey,
-                              fontSize: 10,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  chat.message,
+                                  style: TextStyle(
+                                    color: isMe ? Colors.white : (isDark ? Colors.white : Colors.black87),
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                if (chat.fileUrl != null) ...[
+                                  const SizedBox(height: 8),
+                                  ElevatedButton.icon(
+                                    onPressed: () async {
+                                      final uri = Uri.parse(chat.fileUrl!);
+                                      if (await canLaunchUrl(uri)) {
+                                        await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                      }
+                                    },
+                                    icon: Icon(Icons.download, size: 16, color: isMe ? AppTheme.primaryPurple : Colors.white),
+                                    label: Text("Unduh File", style: TextStyle(color: isMe ? AppTheme.primaryPurple : Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: isMe ? Colors.white : AppTheme.primaryPurple,
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                      minimumSize: const Size(0, 30),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                    ),
+                                  )
+                                ],
+                                const SizedBox(height: 6),
+                                Text(
+                                  time,
+                                  style: TextStyle(
+                                    color: isMe ? Colors.white70 : Colors.grey,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
+                        ),
                       ),
                     ),
-                  );
+                  ).animate().fade(duration: 300.ms).slideY(begin: 0.1, end: 0);
                 },
               ),
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              color: isDark ? const Color(0xFF2C2C2C) : Colors.white,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _msgController,
-                      decoration: InputDecoration(
-                        hintText: 'Ketik pesan...',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24),
-                          borderSide: BorderSide.none,
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.black.withValues(alpha: 0.4) : Colors.white.withValues(alpha: 0.5),
+                    border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.2))),
+                  ),
+                  child: SafeArea(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _msgController,
+                            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+                            decoration: InputDecoration(
+                              hintText: 'Ketik pesan...',
+                              hintStyle: TextStyle(color: isDark ? Colors.white54 : Colors.black54),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(24),
+                                borderSide: BorderSide.none,
+                              ),
+                              filled: true,
+                              fillColor: isDark ? Colors.black26 : Colors.white70,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            ),
+                          ),
                         ),
-                        filled: true,
-                        fillColor: isDark ? Colors.black26 : Colors.grey[200],
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      ),
+                        const SizedBox(width: 8),
+                        if (_isUploading)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8.0),
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primaryPurple),
+                            ),
+                          )
+                        else
+                          IconButton(
+                            icon: Icon(Icons.attach_file, color: isDark ? Colors.white70 : Colors.black54),
+                            onPressed: _pickAndUploadFile,
+                          ),
+                        CircleAvatar(
+                          backgroundColor: AppTheme.primaryPurple,
+                          child: IconButton(
+                            icon: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                            onPressed: () {
+                              if (_msgController.text.trim().isNotEmpty) {
+                                chatProvider.sendMessage(
+                                  widget.currentUserId,
+                                  widget.contactId,
+                                  _msgController.text.trim(),
+                                );
+                                _msgController.clear();
+                                Future.delayed(const Duration(milliseconds: 100), () => _scrollToBottom());
+                              }
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  if (_isUploading)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    )
-                  else
-                    IconButton(
-                      icon: const Icon(Icons.attach_file, color: Colors.grey),
-                      onPressed: _pickAndUploadFile,
-                    ),
-                  CircleAvatar(
-                    backgroundColor: Colors.blue[800],
-                    child: IconButton(
-                      icon: const Icon(Icons.send, color: Colors.white, size: 20),
-                      onPressed: () {
-                        if (_msgController.text.trim().isNotEmpty) {
-                          chatProvider.sendMessage(
-                            widget.currentUserId,
-                            widget.contactId,
-                            _msgController.text.trim(),
-                          );
-                          _msgController.clear();
-                          Future.delayed(const Duration(milliseconds: 100), () => _scrollToBottom());
-                        }
-                      },
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ],

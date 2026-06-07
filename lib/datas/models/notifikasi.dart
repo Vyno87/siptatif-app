@@ -1,12 +1,12 @@
 class Notifikasi {
-  final String id;
+  String? id;
   final String judul;
   final String pesan;
   final String waktu;
   bool isRead;
 
   Notifikasi({
-    required this.id,
+    this.id,
     required this.judul,
     required this.pesan,
     required this.waktu,

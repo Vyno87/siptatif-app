@@ -4,6 +4,8 @@ import 'package:siptatif_app/datas/models/penguji.dart';
 import 'package:siptatif_app/widgets/glass_card.dart';
 import 'package:siptatif_app/providers/penguji_provider.dart';
 import 'package:siptatif_app/providers/notifikasi_provider.dart';
+import 'package:siptatif_app/utils/app_theme.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class PengujiScreen extends StatelessWidget {
   const PengujiScreen({super.key});
@@ -11,38 +13,45 @@ class PengujiScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<PengujiProvider>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
       child: Column(
         children: [
-          const SizedBox(
-            height: 3,
-          ),
+          const SizedBox(height: 3),
           TextField(
-            style: const TextStyle(height: 1),
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
             decoration: InputDecoration(
               prefixIcon: const Icon(Icons.search),
+              filled: true,
+              fillColor: isDark ? Colors.black26 : Colors.white60,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12.0),
+                borderRadius: BorderRadius.circular(15.0),
+                borderSide: BorderSide.none,
               ),
-              hintText: 'Search',
+              hintText: 'Search Penguji',
+              hintStyle: TextStyle(color: isDark ? Colors.white54 : Colors.black54),
             ),
-          ),
-          const SizedBox(
-            height: 14,
-          ),
+          ).animate().fade(duration: 500.ms).slideY(begin: -0.2, end: 0),
+          const SizedBox(height: 14),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               FilledButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, "/tambah-penguji");
-                  },
-                  child: const Text("+ Tambah Data")),
+                onPressed: () {
+                  Navigator.pushNamed(context, "/tambah-penguji");
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppTheme.primaryPurple,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text("+ Tambah Data", style: TextStyle(fontWeight: FontWeight.bold)),
+              ).animate().scale(delay: 500.ms),
             ],
           ),
+          const SizedBox(height: 10),
           if (provider.isLoading)
             const Center(
               child: Padding(
@@ -65,26 +74,13 @@ class PengujiScreen extends StatelessWidget {
               children: provider.listPenguji.asMap().entries.map((entry) {
                 final index = entry.key;
                 final penguji = entry.value;
-                return TweenAnimationBuilder(
-                  tween: Tween<double>(begin: 0, end: 1),
-                  duration: Duration(milliseconds: 300 + (index * 100)),
-                  curve: Curves.easeOutCubic,
-                  builder: (context, value, child) {
-                    return Transform.translate(
-                      offset: Offset(0, 50 * (1 - value)),
-                      child: Opacity(
-                        opacity: value,
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: _templatePengujiCard(context, penguji),
-                );
+                return _templatePengujiCard(context, penguji)
+                    .animate()
+                    .fade(delay: (100 * index).ms)
+                    .slideX(begin: 0.1, end: 0, curve: Curves.easeOutBack);
               }).toList(),
             ),
-          const SizedBox(
-            height: 4,
-          ),
+          const SizedBox(height: 4),
         ],
       ),
     );

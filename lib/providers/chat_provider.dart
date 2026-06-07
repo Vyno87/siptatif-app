@@ -1,29 +1,39 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:siptatif_app/datas/models/chat.dart';
-import 'package:siptatif_app/services/api_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatProvider extends ChangeNotifier {
   List<Chat> _chats = [];
   bool isLoading = false;
   String errorMessage = '';
+  StreamSubscription<QuerySnapshot>? _chatSubscription;
 
   List<Chat> get chats => _chats;
 
   Future<void> fetchChats() async {
     isLoading = true;
     errorMessage = '';
-    // Don't notifyListeners here unless you want to show full loading indicator every time it polls
-
-    try {
-      final List<dynamic> data = await ApiService.get('chats');
-      _chats = data.map((json) => Chat.fromJson(json)).toList();
-      _chats.sort((a, b) => DateTime.parse(a.timestamp).compareTo(DateTime.parse(b.timestamp)));
-    } catch (e) {
-      errorMessage = "Terjadi kesalahan saat memuat chat.";
-    } finally {
-      isLoading = false;
-      notifyListeners();
-    }
+    
+    _chatSubscription?.cancel();
+    _chatSubscription = FirebaseFirestore.instance
+        .collection('chats')
+        .orderBy('timestamp')
+        .snapshots()
+        .listen((snapshot) {
+          _chats = snapshot.docs.map((doc) {
+            final data = doc.data();
+            data['id'] = doc.id;
+            return Chat.fromJson(data);
+          }).toList();
+          
+          isLoading = false;
+          notifyListeners();
+        }, onError: (e) {
+          errorMessage = "Terjadi kesalahan saat memuat chat.";
+          isLoading = false;
+          notifyListeners();
+        });
   }
 
   Future<void> sendMessage(String senderId, String receiverId, String message, {String? fileUrl}) async {
@@ -36,11 +46,8 @@ class ChatProvider extends ChangeNotifier {
         fileUrl: fileUrl,
       );
 
-      final response = await ApiService.post('chats', chat.toJson());
-      
-      // Optimistic update
-      _chats.add(Chat.fromJson(response));
-      notifyListeners();
+      await FirebaseFirestore.instance.collection('chats').add(chat.toJson());
+      // No need to update _chats manually, the stream will trigger notifyListeners automatically.
     } catch (e) {
       errorMessage = "Gagal mengirim pesan.";
       notifyListeners();
@@ -53,5 +60,11 @@ class ChatProvider extends ChangeNotifier {
       (chat.senderId == userId1 && chat.receiverId == userId2) ||
       (chat.senderId == userId2 && chat.receiverId == userId1)
     ).toList();
+  }
+
+  @override
+  void dispose() {
+    _chatSubscription?.cancel();
+    super.dispose();
   }
 }

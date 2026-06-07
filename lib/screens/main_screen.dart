@@ -1,8 +1,10 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:siptatif_app/dialogs/preview_profile_pict.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:siptatif_app/screens/beranda_screen.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:siptatif_app/screens/dosen_screen.dart';
 import 'package:siptatif_app/screens/logbook_mahasiswa_screen.dart';
 import 'package:siptatif_app/screens/pendaftaran_sidang_screen.dart';
@@ -21,6 +23,7 @@ import 'package:siptatif_app/providers/notifikasi_provider.dart';
 import 'package:siptatif_app/providers/theme_provider.dart';
 import 'package:siptatif_app/datas/models/user.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -52,6 +55,179 @@ class _MainScreenState extends State<MainScreen> {
     const ChatListScreen(),
     const PengaturanScreen(),
   ];
+
+  Future<void> _pickImage(ImageSource source) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: source, imageQuality: 50);
+
+    if (pickedFile != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sedang mengunggah foto profil...')),
+      );
+
+      final success = await context.read<AuthProvider>().uploadProfilePicture(pickedFile.path);
+      
+      if (mounted) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Foto profil berhasil diperbarui!')),
+          );
+        } else {
+          final errMsg = context.read<AuthProvider>().errorMessage;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(errMsg.isNotEmpty ? errMsg : 'Gagal mengunggah foto profil')),
+          );
+        }
+      }
+    }
+  }
+
+  void _showProfileOptions() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              padding: const EdgeInsets.only(bottom: 20, top: 10),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.black.withValues(alpha: 0.6) : Colors.white.withValues(alpha: 0.6),
+                border: Border(
+                  top: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    width: 1.5,
+                  ),
+                ),
+              ),
+              child: SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      height: 5,
+                      width: 50,
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.white30 : Colors.black26,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    _buildProfileOptionTile(
+                      icon: Icons.camera_alt_rounded,
+                      color: Colors.blueAccent,
+                      title: 'Ambil dari Kamera',
+                      onTap: () {
+                        Navigator.pop(context);
+                        _pickImage(ImageSource.camera);
+                      },
+                      isDark: isDark,
+                    ).animate().fade(delay: 100.ms).slideY(begin: 0.2, end: 0),
+                    _buildProfileOptionTile(
+                      icon: Icons.photo_library_rounded,
+                      color: Colors.purpleAccent,
+                      title: 'Pilih dari Galeri',
+                      onTap: () {
+                        Navigator.pop(context);
+                        _pickImage(ImageSource.gallery);
+                      },
+                      isDark: isDark,
+                    ).animate().fade(delay: 200.ms).slideY(begin: 0.2, end: 0),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5),
+                      child: Divider(color: isDark ? Colors.white24 : Colors.black12),
+                    ),
+                    _buildProfileOptionTile(
+                      icon: Icons.logout_rounded,
+                      color: Colors.redAccent,
+                      title: 'Log Out',
+                      textColor: Colors.redAccent,
+                      onTap: () {
+                        Navigator.pop(context);
+                        _showLogoutDialog();
+                      },
+                      isDark: isDark,
+                    ).animate().fade(delay: 300.ms).slideY(begin: 0.2, end: 0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildProfileOptionTile({
+    required IconData icon,
+    required Color color,
+    required String title,
+    required VoidCallback onTap,
+    required bool isDark,
+    Color? textColor,
+  }) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 25, vertical: 5),
+      leading: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.15),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: color, size: 24),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: textColor ?? (isDark ? Colors.white : Colors.black87),
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      onTap: onTap,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      splashColor: color.withValues(alpha: 0.1),
+    );
+  }
+
+  void _showLogoutDialog() {
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Warning: Log-Out Confirmation!'),
+        content: const Text('Apakah anda yakin ingin log-out dari akun anda?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'Cancel'),
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all(Colors.red),
+            ),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pushReplacementNamed(context, "/login");
+            },
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all(Colors.green),
+            ),
+            child: const Text(
+              'OK',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
+            ),
+          ),
+        ],
+      )
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,17 +290,24 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-  Container _bottomNavigationBar() {
-    return Container(
-      decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: Theme.of(context).dividerColor, width: 1.0))),
-      child: BottomNavigationBar(
-        elevation: 30,
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
+  Widget _bottomNavigationBar() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDark ? Colors.black.withValues(alpha: 0.5) : Colors.white.withValues(alpha: 0.5),
+            border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1.0)),
+          ),
+          child: BottomNavigationBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            type: BottomNavigationBarType.fixed,
+            showSelectedLabels: true,
+            showUnselectedLabels: true,
         items: [
           _botBarItem(context: context, icon: "assets/svgs/beranda-icon.svg", label: "Beranda"),
           _botBarItem(context: context, 
@@ -154,7 +337,9 @@ class _MainScreenState extends State<MainScreen> {
           letterSpacing: -0.9,
         ),
       ),
-    );
+        ),
+      ),
+    ).animate().slideY(begin: 1, end: 0, duration: 500.ms, curve: Curves.easeOutBack);
   }
 
   BottomNavigationBarItem _botBarItem(
@@ -203,105 +388,123 @@ class _MainScreenState extends State<MainScreen> {
         label: label);
   }
 
-  Container _bottomNavDosen() {
-    return Container(
-      decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: Theme.of(context).dividerColor, width: 1.0))),
-      child: BottomNavigationBar(
-        elevation: 30,
-        currentIndex: _selectedIndex.clamp(0, 2),
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        useLegacyColorScheme: false,
-        selectedFontSize: 12,
-        unselectedFontSize: 12,
-        selectedIconTheme: IconThemeData(color: Theme.of(context).colorScheme.primary),
-        unselectedIconTheme: IconThemeData(
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
-        selectedLabelStyle: TextStyle(
-          color: Theme.of(context).colorScheme.primary,
-          fontFamily: "Montserrat-SemiBold",
-          letterSpacing: -0.9,
+  Widget _bottomNavDosen() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDark ? Colors.black.withValues(alpha: 0.5) : Colors.white.withValues(alpha: 0.5),
+            border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1.0)),
+          ),
+          child: BottomNavigationBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            currentIndex: _selectedIndex.clamp(0, 2),
+            onTap: _onItemTapped,
+            type: BottomNavigationBarType.fixed,
+            showSelectedLabels: true,
+            showUnselectedLabels: true,
+            useLegacyColorScheme: false,
+            selectedFontSize: 12,
+            unselectedFontSize: 12,
+            selectedIconTheme: IconThemeData(color: Theme.of(context).colorScheme.primary),
+            unselectedIconTheme: IconThemeData(
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
+            selectedLabelStyle: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
+              fontFamily: "Montserrat-SemiBold",
+              letterSpacing: -0.9,
+            ),
+            unselectedLabelStyle: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
+              fontFamily: "Montserrat-SemiBold",
+              letterSpacing: -0.9,
+            ),
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.school_outlined),
+                activeIcon: Icon(Icons.school_rounded),
+                label: 'Mahasiswa Saya',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.chat_bubble_outline),
+                activeIcon: Icon(Icons.chat_bubble_rounded),
+                label: 'Pesan',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.settings_outlined),
+                activeIcon: Icon(Icons.settings_rounded),
+                label: 'Pengaturan',
+              ),
+            ],
+          ),
         ),
-        unselectedLabelStyle: TextStyle(
-          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
-          fontFamily: "Montserrat-SemiBold",
-          letterSpacing: -0.9,
-        ),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.school_outlined),
-            activeIcon: Icon(Icons.school_rounded),
-            label: 'Mahasiswa Saya',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            activeIcon: Icon(Icons.chat_bubble_rounded),
-            label: 'Pesan',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            activeIcon: Icon(Icons.settings_rounded),
-            label: 'Pengaturan',
-          ),
-        ],
       ),
-    );
+    ).animate().slideY(begin: 1, end: 0, duration: 500.ms, curve: Curves.easeOutBack);
   }
 
-  Container _bottomNavMahasiswa() {
-    return Container(
-      decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: Theme.of(context).dividerColor, width: 1.0))),
-      child: BottomNavigationBar(
-        elevation: 30,
-        currentIndex: _selectedIndex.clamp(0, 3),
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        useLegacyColorScheme: false,
-        selectedFontSize: 12,
-        unselectedFontSize: 12,
-        selectedIconTheme: IconThemeData(color: Theme.of(context).colorScheme.primary),
-        unselectedIconTheme: IconThemeData(
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
-        selectedLabelStyle: TextStyle(
-          color: Theme.of(context).colorScheme.primary,
-          fontFamily: "Montserrat-SemiBold",
-          letterSpacing: -0.9,
+  Widget _bottomNavMahasiswa() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDark ? Colors.black.withValues(alpha: 0.5) : Colors.white.withValues(alpha: 0.5),
+            border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.2), width: 1.0)),
+          ),
+          child: BottomNavigationBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            currentIndex: _selectedIndex.clamp(0, 3),
+            onTap: _onItemTapped,
+            type: BottomNavigationBarType.fixed,
+            showSelectedLabels: true,
+            showUnselectedLabels: true,
+            useLegacyColorScheme: false,
+            selectedFontSize: 12,
+            unselectedFontSize: 12,
+            selectedIconTheme: IconThemeData(color: Theme.of(context).colorScheme.primary),
+            unselectedIconTheme: IconThemeData(
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
+            selectedLabelStyle: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
+              fontFamily: "Montserrat-SemiBold",
+              letterSpacing: -0.9,
+            ),
+            unselectedLabelStyle: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
+              fontFamily: "Montserrat-SemiBold",
+              letterSpacing: -0.9,
+            ),
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.history_edu_outlined),
+                activeIcon: Icon(Icons.history_edu_rounded),
+                label: 'Logbook',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.assignment_outlined),
+                activeIcon: Icon(Icons.assignment_rounded),
+                label: 'Tugas Akhir',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.chat_bubble_outline),
+                activeIcon: Icon(Icons.chat_bubble_rounded),
+                label: 'Pesan',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.settings_outlined),
+                activeIcon: Icon(Icons.settings_rounded),
+                label: 'Pengaturan',
+              ),
+            ],
+          ),
         ),
-        unselectedLabelStyle: TextStyle(
-          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
-          fontFamily: "Montserrat-SemiBold",
-          letterSpacing: -0.9,
-        ),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history_edu_outlined),
-            activeIcon: Icon(Icons.history_edu_rounded),
-            label: 'Logbook',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.assignment_outlined),
-            activeIcon: Icon(Icons.assignment_rounded),
-            label: 'Tugas Akhir',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            activeIcon: Icon(Icons.chat_bubble_rounded),
-            label: 'Pesan',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            activeIcon: Icon(Icons.settings_rounded),
-            label: 'Pengaturan',
-          ),
-        ],
       ),
-    );
+    ).animate().slideY(begin: 1, end: 0, duration: 500.ms, curve: Curves.easeOutBack);
   }
 
 
@@ -389,50 +592,13 @@ class _MainScreenState extends State<MainScreen> {
                     PreviewProfilePictDialog(imgFile: user?.profilePict ?? ''));
           },
           onTap: () {
-            showDialog<String>(
-                context: context,
-                builder: (BuildContext context) => AlertDialog(
-                      title: const Text('Warning: Log-Out Confirmation!'),
-                      content: const Text(
-                          'Apakah anda yakin ingin log-out dari akun anda?'),
-                      actions: <Widget>[
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, 'Cancel'),
-                          style: ButtonStyle(
-                            backgroundColor:
-                                WidgetStateProperty.all(Colors.red),
-                          ),
-                          child: const Text(
-                            'Cancel',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            Navigator.pushReplacementNamed(context, "/login");
-                          },
-                          style: ButtonStyle(
-                            backgroundColor:
-                                WidgetStateProperty.all(Colors.green),
-                          ),
-                          child: const Text(
-                            'OK',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ));
+            _showProfileOptions();
           },
           child: (user != null && user.profilePict.isNotEmpty)
               ? CircleAvatar(
-                  backgroundImage: AssetImage(user.profilePict),
+                  backgroundImage: user.profilePict.startsWith('http') 
+                      ? NetworkImage(user.profilePict) as ImageProvider
+                      : AssetImage(user.profilePict),
                   radius: 20,
                 )
               : const CircleAvatar(
@@ -487,7 +653,11 @@ class _MainScreenState extends State<MainScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         InkWell(
-                          onTap: () async {
+                          onTap: () {
+                            _scaffoldKey.currentState?.closeDrawer();
+                            _showProfileOptions();
+                          },
+                          onLongPress: () async {
                             await showDialog(
                                 context: context,
                                 builder: (_) => PreviewProfilePictDialog(
@@ -495,7 +665,9 @@ class _MainScreenState extends State<MainScreen> {
                           },
                           child: (user != null && user.profilePict.isNotEmpty)
                               ? CircleAvatar(
-                                  backgroundImage: AssetImage(user.profilePict),
+                                  backgroundImage: user.profilePict.startsWith('http')
+                                      ? NetworkImage(user.profilePict) as ImageProvider
+                                      : AssetImage(user.profilePict),
                                   radius: 33,
                                 )
                               : const CircleAvatar(
@@ -649,21 +821,24 @@ class _MainScreenState extends State<MainScreen> {
           ListTile(
             leading: Icon(Icons.info_outline, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87),
             title: Text('Tentang Aplikasi', style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black)),
-            onTap: () {
+            onTap: () async {
               _scaffoldKey.currentState?.closeDrawer();
+              final packageInfo = await PackageInfo.fromPlatform();
+              if (!mounted) return;
+              
               showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('SIPTATIF v1.0'),
-                  content: const Text('Sistem Informasi Penjadwalan Tugas Akhir Teknik Informatika (SIPTATIF).\n\nDikembangkan Oleh Ahmad Novy Mufasir Untuk Universitas Pamulang.'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Tutup'),
-                    ),
-                  ],
-                ),
-              );
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text('SIPTATIF v${packageInfo.version}+${packageInfo.buildNumber}'),
+                    content: const Text('Sistem Informasi Penjadwalan Tugas Akhir Teknik Informatika (SIPTATIF).\n\nDikembangkan Oleh Ahmad Novy Mufasir Untuk Universitas Pamulang.'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Tutup'),
+                      ),
+                    ],
+                  ),
+                );
             },
           ),
           if (user?.roles == 'Dosen') ...[

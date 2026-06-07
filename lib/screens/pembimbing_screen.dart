@@ -4,6 +4,8 @@ import 'package:siptatif_app/datas/models/pembimbing.dart';
 import 'package:siptatif_app/providers/pembimbing_provider.dart';
 import 'package:siptatif_app/providers/notifikasi_provider.dart';
 import 'package:siptatif_app/widgets/glass_card.dart';
+import 'package:siptatif_app/utils/app_theme.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class PembimbingScreen extends StatelessWidget {
   const PembimbingScreen({super.key});
@@ -11,38 +13,45 @@ class PembimbingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<PembimbingProvider>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
       child: Column(
         children: [
-          const SizedBox(
-            height: 3,
-          ),
+          const SizedBox(height: 3),
           TextField(
-            style: const TextStyle(height: 1),
+            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
             decoration: InputDecoration(
               prefixIcon: const Icon(Icons.search),
+              filled: true,
+              fillColor: isDark ? Colors.black26 : Colors.white60,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12.0),
+                borderRadius: BorderRadius.circular(15.0),
+                borderSide: BorderSide.none,
               ),
-              hintText: 'Search',
+              hintText: 'Search Pembimbing',
+              hintStyle: TextStyle(color: isDark ? Colors.white54 : Colors.black54),
             ),
-          ),
-          const SizedBox(
-            height: 14,
-          ),
+          ).animate().fade(duration: 500.ms).slideY(begin: -0.2, end: 0),
+          const SizedBox(height: 14),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               FilledButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, "/tambah-pembimbing");
-                  },
-                  child: const Text("+ Tambah Data")),
+                onPressed: () {
+                  Navigator.pushNamed(context, "/tambah-pembimbing");
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppTheme.primaryPurple,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text("+ Tambah Data", style: TextStyle(fontWeight: FontWeight.bold)),
+              ).animate().scale(delay: 500.ms),
             ],
           ),
+          const SizedBox(height: 10),
           if (provider.isLoading)
             const Center(
               child: Padding(
@@ -65,26 +74,13 @@ class PembimbingScreen extends StatelessWidget {
               children: provider.listPembimbing.asMap().entries.map((entry) {
                 final index = entry.key;
                 final pembimbing = entry.value;
-                return TweenAnimationBuilder(
-                  tween: Tween<double>(begin: 0, end: 1),
-                  duration: Duration(milliseconds: 300 + (index * 100)),
-                  curve: Curves.easeOutCubic,
-                  builder: (context, value, child) {
-                    return Transform.translate(
-                      offset: Offset(0, 50 * (1 - value)),
-                      child: Opacity(
-                        opacity: value,
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: _templatePembimbingCard(context, pembimbing),
-                );
+                return _templatePembimbingCard(context, pembimbing)
+                    .animate()
+                    .fade(delay: (100 * index).ms)
+                    .slideX(begin: 0.1, end: 0, curve: Curves.easeOutBack);
               }).toList(),
             ),
-          const SizedBox(
-            height: 4,
-          ),
+          const SizedBox(height: 4),
         ],
       ),
     );

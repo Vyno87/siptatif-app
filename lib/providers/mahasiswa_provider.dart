@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:siptatif_app/datas/models/mahasiswa.dart';
-import 'package:siptatif_app/services/api_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MahasiswaProvider extends ChangeNotifier {
   List<Mahasiswa> _semuaMahasiswa = [];
@@ -20,8 +20,12 @@ class MahasiswaProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final List<dynamic> data = await ApiService.get('mahasiswa');
-      _semuaMahasiswa = data.map((json) => Mahasiswa.fromJson(json)).toList();
+      final QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('mahasiswa').get();
+      _semuaMahasiswa = snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['id'] = doc.id;
+        return Mahasiswa.fromJson(data);
+      }).toList();
       _displayedMahasiswa = List.from(_semuaMahasiswa);
       if (_searchKeyword.isNotEmpty) {
         runFilter(_searchKeyword);
@@ -52,10 +56,10 @@ class MahasiswaProvider extends ChangeNotifier {
 
   Future<void> addMahasiswa(Mahasiswa m) async {
     try {
-      final response = await ApiService.post('mahasiswa', m.toJson());
-      final newMhs = Mahasiswa.fromJson(response);
-      _semuaMahasiswa.add(newMhs);
-      _displayedMahasiswa.add(newMhs);
+      final docRef = await FirebaseFirestore.instance.collection('mahasiswa').add(m.toJson());
+      m.id = docRef.id;
+      _semuaMahasiswa.add(m);
+      _displayedMahasiswa.add(m);
       notifyListeners();
     } catch (e) {
       throw Exception('Gagal menambah mahasiswa');
@@ -65,7 +69,7 @@ class MahasiswaProvider extends ChangeNotifier {
   Future<void> hapusMahasiswa(Mahasiswa m) async {
     if (m.id == null) return;
     try {
-      await ApiService.delete('mahasiswa/${m.id}');
+      await FirebaseFirestore.instance.collection('mahasiswa').doc(m.id).delete();
       _semuaMahasiswa.removeWhere((item) => item.id == m.id);
       _displayedMahasiswa.removeWhere((item) => item.id == m.id);
       notifyListeners();
@@ -77,14 +81,13 @@ class MahasiswaProvider extends ChangeNotifier {
   Future<void> updateMahasiswa(Mahasiswa m) async {
     if (m.id == null) return;
     try {
-      final response = await ApiService.put('mahasiswa/${m.id}', m.toJson());
-      final updatedMhs = Mahasiswa.fromJson(response);
+      await FirebaseFirestore.instance.collection('mahasiswa').doc(m.id).update(m.toJson());
       
       final idxSemua = _semuaMahasiswa.indexWhere((item) => item.id == m.id);
-      if (idxSemua != -1) _semuaMahasiswa[idxSemua] = updatedMhs;
+      if (idxSemua != -1) _semuaMahasiswa[idxSemua] = m;
       
       final idxDisplay = _displayedMahasiswa.indexWhere((item) => item.id == m.id);
-      if (idxDisplay != -1) _displayedMahasiswa[idxDisplay] = updatedMhs;
+      if (idxDisplay != -1) _displayedMahasiswa[idxDisplay] = m;
       
       notifyListeners();
     } catch (e) {

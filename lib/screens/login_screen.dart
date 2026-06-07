@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:siptatif_app/providers/auth_provider.dart';
 import 'package:siptatif_app/widgets/glass_card.dart';
+import 'package:siptatif_app/utils/app_theme.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -25,13 +27,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: [Color(0xFF8EC5FC), Color(0xFFE0C3FC)],
-        ),
+      decoration: BoxDecoration(
+        gradient: isDark ? AppTheme.darkGlassGradient : AppTheme.neonGradient,
       ),
       child: Scaffold(
         resizeToAvoidBottomInset: true,
@@ -39,209 +39,166 @@ class _LoginScreenState extends State<LoginScreen> {
         body: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-            child: TweenAnimationBuilder(
-              tween: Tween<double>(begin: 0, end: 1),
-              duration: const Duration(milliseconds: 600),
-              curve: Curves.easeOutBack,
-              builder: (context, value, child) {
-                return Transform.scale(
-                  scale: 0.8 + (0.2 * value),
-                  child: Opacity(
-                    opacity: value.clamp(0.0, 1.0),
-                    child: child,
-                  ),
-                );
-              },
-              child: GlassCard(
+            child: GlassCard(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
                 child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Center(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Center(
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(20),
                           child: Image.asset(
                             "assets/img/siptatif-banner-intro-page.jpg",
-                            width: 300,
-                          ),
-                        )),
-              Container(
-                height: 25,
-              ),
-              const Text(
-                "Login Page",
-                style: TextStyle(
-                    fontFamily: "Montserrat-Bold",
-                    fontSize: 36,
-                    letterSpacing: -2,
-                    decoration: TextDecoration.underline),
-              ),
-              Container(
-                height: 25,
-              ),
-              SizedBox(
-                width: 320,
-                child: TextFormField(
-                  controller: _emailController,
-                  style: const TextStyle(height: 1),
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                    hintText: 'Email/Username',
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Email/Username tidak boleh kosong';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              Container(
-                height: 22,
-              ),
-              SizedBox(
-                width: 320,
-                child: TextFormField(
-                  controller: _passwordController,
-                  style: const TextStyle(height: 1),
-                  obscureText: passwordVisible,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                    hintText: 'Password',
-                    suffixIcon: IconButton(
-                      icon: Icon(passwordVisible
-                          ? Icons.visibility_off
-                          : Icons.visibility),
-                      onPressed: () {
-                        setState(
-                          () {
-                            passwordVisible = !passwordVisible;
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Password tidak boleh kosong';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              const SizedBox(
-                height: 13,
-              ),
-              Container(
-                alignment: Alignment.topRight,
-                width: 318,
-                child: InkWell(
-                  onTap: () {
-                    Navigator.pushNamed(context, "/lupa-password");
-                  },
-                  child: const Text("Lupa Password?",
-                      style: TextStyle(
-                          fontFamily: "Montserrat-SemiBold",
-                          fontSize: 15,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.7)),
-                ),
-              ),
-              const SizedBox(
-                width: 30,
-              ),
-              const SizedBox(
-                height: 24,
-              ),
-              Consumer<AuthProvider>(
-                builder: (consumerContext, authProvider, child) {
-                  return Column(
-                    children: [
-                      if (authProvider.errorMessage.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: Text(
-                            authProvider.errorMessage,
-                            style: const TextStyle(color: Colors.red),
+                            width: 250,
                           ),
                         ),
-                      TextButton(
-                        onPressed: authProvider.isLoading
-                            ? null
-                            : () async {
-                                if (_formKey.currentState!.validate()) {
-                                  final success = await authProvider.login(
-                                    _emailController.text,
-                                    _passwordController.text,
-                                  );
-                                  if (!mounted) return;
-                                  if (success) {
-                                    // ignore: use_build_context_synchronously
-                                    Navigator.pushReplacementNamed(context, "/main");
-                                  }
-                                }
-                              },
-                        style: TextButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.primary,
-                            fixedSize: const Size(329, 50)),
-                        child: authProvider.isLoading
-                            ? const CircularProgressIndicator(color: Colors.white)
-                            : Text(
-                                'LOGIN',
-                                style: TextStyle(
-                                  fontFamily: "Montserrat-Bold",
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).colorScheme.onPrimary,
-                                ),
-                              ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-              const SizedBox(
-                height: 47,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("Belum ada akun? ",
-                      style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.4)),
-                  InkWell(
-                    onTap: () {
-                      Navigator.pushNamed(context, "/register");
-                    },
-                    child: const Text("Daftar Disini",
+                      ).animate().fade(duration: 500.ms).scale(delay: 200.ms),
+                      const SizedBox(height: 25),
+                      Text(
+                        "SIPTATIF",
                         style: TextStyle(
-                            fontFamily: "Montserrat-Bold",
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: -0.4,
-                            decoration: TextDecoration.underline)),
+                          fontSize: 32,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 2,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ).animate().fade(delay: 300.ms).slideY(begin: 0.5, end: 0),
+                      Text(
+                        "Welcome Back 👋",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: isDark ? Colors.white70 : Colors.black54,
+                        ),
+                      ).animate().fade(delay: 400.ms).slideY(begin: 0.5, end: 0),
+                      const SizedBox(height: 30),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextFormField(
+                          controller: _emailController,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15.0),
+                              borderSide: BorderSide.none,
+                            ),
+                            filled: true,
+                            fillColor: isDark ? Colors.black26 : Colors.white60,
+                            hintText: 'Email / Username',
+                            prefixIcon: const Icon(Icons.person),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) return 'Email tidak boleh kosong';
+                            return null;
+                          },
+                        ),
+                      ).animate().fade(delay: 500.ms).slideX(begin: -0.2, end: 0),
+                      const SizedBox(height: 15),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextFormField(
+                          controller: _passwordController,
+                          obscureText: passwordVisible,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15.0),
+                              borderSide: BorderSide.none,
+                            ),
+                            filled: true,
+                            fillColor: isDark ? Colors.black26 : Colors.white60,
+                            hintText: 'Password',
+                            prefixIcon: const Icon(Icons.lock),
+                            suffixIcon: IconButton(
+                              icon: Icon(passwordVisible ? Icons.visibility_off : Icons.visibility),
+                              onPressed: () => setState(() => passwordVisible = !passwordVisible),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) return 'Password tidak boleh kosong';
+                            return null;
+                          },
+                        ),
+                      ).animate().fade(delay: 600.ms).slideX(begin: 0.2, end: 0),
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () => Navigator.pushNamed(context, "/lupa-password"),
+                          child: const Text(
+                            "Lupa Password?",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ).animate().fade(delay: 700.ms),
+                      const SizedBox(height: 20),
+                      Consumer<AuthProvider>(
+                        builder: (context, authProvider, child) {
+                          return Column(
+                            children: [
+                              if (authProvider.errorMessage.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 15),
+                                  child: Text(
+                                    authProvider.errorMessage,
+                                    style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ElevatedButton(
+                                onPressed: authProvider.isLoading
+                                    ? null
+                                    : () async {
+                                        if (_formKey.currentState!.validate()) {
+                                          final currentContext = this.context;
+                                          final success = await authProvider.login(
+                                            _emailController.text,
+                                            _passwordController.text,
+                                          );
+                                          if (!mounted || !currentContext.mounted) return;
+                                          if (success) Navigator.pushReplacementNamed(currentContext, "/main");
+                                        }
+                                      },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppTheme.primaryBlue,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                  minimumSize: const Size(double.infinity, 55),
+                                  elevation: 5,
+                                ),
+                                child: authProvider.isLoading
+                                    ? const CircularProgressIndicator(color: Colors.white)
+                                    : const Text(
+                                        'LOGIN',
+                                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                                      ),
+                              ).animate().fade(delay: 800.ms).scale(delay: 800.ms),
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 30),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("Belum punya akun? ", style: TextStyle(color: isDark ? Colors.white70 : Colors.black87)),
+                          InkWell(
+                            onTap: () => Navigator.pushNamed(context, "/register"),
+                            child: const Text(
+                              "Daftar Disini",
+                              style: TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryPurple),
+                            ),
+                          ),
+                        ],
+                      ).animate().fade(delay: 900.ms),
+                    ],
                   ),
-                ],
+                ),
               ),
-              const SizedBox(
-                height: 5,
-              ),
-            ],
+            ),
           ),
         ),
       ),
-      ),
-    ),
-  ),
-  ),
-);
+    );
   }
 }

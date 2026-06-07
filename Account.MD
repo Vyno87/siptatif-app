@@ -1,8 +1,5 @@
-admin@siptatif.com
-admin12
+vynothea7@gmail.com
+Nyorean9
 
 budi@siptatif.com
 dosen123
-
-farhan@siptatif.com
-mhs
