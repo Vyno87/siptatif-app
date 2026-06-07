@@ -175,7 +175,7 @@ class _MahasiswaDetailScreenState extends State<MahasiswaDetailScreen> {
   }
 
   void _showValidasiDialog(BuildContext context, Logbook logbook) {
-    final _catatanEvalController = TextEditingController();
+    final catatanEvalController = TextEditingController();
     showDialog(
       context: context,
       builder: (context) {
@@ -187,7 +187,7 @@ class _MahasiswaDetailScreenState extends State<MahasiswaDetailScreen> {
               Text('Progres: ${logbook.materiProgres}'),
               const SizedBox(height: 16),
               TextField(
-                controller: _catatanEvalController,
+                controller: catatanEvalController,
                 decoration: const InputDecoration(
                   labelText: 'Catatan Evaluasi',
                   border: OutlineInputBorder(),
@@ -204,7 +204,7 @@ class _MahasiswaDetailScreenState extends State<MahasiswaDetailScreen> {
             ElevatedButton(
               onPressed: () async {
                 logbook.status = 'Direvisi';
-                logbook.catatanDosen = _catatanEvalController.text;
+                logbook.catatanDosen = catatanEvalController.text;
                 await context.read<LogbookProvider>().updateLogbook(logbook);
                 if (context.mounted) Navigator.pop(context);
               },
@@ -214,7 +214,7 @@ class _MahasiswaDetailScreenState extends State<MahasiswaDetailScreen> {
             ElevatedButton(
               onPressed: () async {
                 logbook.status = 'Disetujui';
-                logbook.catatanDosen = _catatanEvalController.text;
+                logbook.catatanDosen = catatanEvalController.text;
                 await context.read<LogbookProvider>().updateLogbook(logbook);
                 if (context.mounted) Navigator.pop(context);
               },

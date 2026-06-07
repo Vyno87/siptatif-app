@@ -19,6 +19,7 @@ import 'package:siptatif_app/providers/notifikasi_provider.dart';
 import 'package:siptatif_app/providers/pembimbing_provider.dart';
 import 'package:siptatif_app/providers/penguji_provider.dart';
 import 'package:siptatif_app/providers/logbook_provider.dart';
+import 'package:siptatif_app/providers/sidang_provider.dart';
 import 'package:siptatif_app/providers/theme_provider.dart';
 
 void main() {
@@ -44,6 +45,7 @@ class _MainAppState extends State<MainApp> {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => NotifikasiProvider()),
         ChangeNotifierProvider(create: (_) => LogbookProvider()),
+        ChangeNotifierProvider(create: (_) => SidangProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {

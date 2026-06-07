@@ -5,6 +5,8 @@ import 'package:siptatif_app/dialogs/preview_profile_pict.dart';
 import 'package:siptatif_app/screens/beranda_screen.dart';
 import 'package:siptatif_app/screens/dosen_screen.dart';
 import 'package:siptatif_app/screens/logbook_mahasiswa_screen.dart';
+import 'package:siptatif_app/screens/pendaftaran_sidang_screen.dart';
+import 'package:siptatif_app/screens/penjadwalan_sidang_screen.dart';
 import 'package:siptatif_app/screens/mahasiswa_screen.dart';
 import 'package:siptatif_app/screens/penguji_screen.dart';
 import 'package:siptatif_app/screens/pembimbing_screen.dart';
@@ -41,6 +43,7 @@ class _MainScreenState extends State<MainScreen> {
 
   List<Widget> get _mahasiswaWidgetBody => [
     const LogbookMahasiswaScreen(),
+    const PendaftaranSidangScreen(),
     const PengaturanScreen(),
   ];
 
@@ -245,6 +248,11 @@ class _MainScreenState extends State<MainScreen> {
             icon: Icon(Icons.history_edu_outlined),
             activeIcon: Icon(Icons.history_edu_rounded),
             label: 'Logbook Saya',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.school_outlined),
+            activeIcon: Icon(Icons.school_rounded),
+            label: 'Sidang',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings_outlined),
@@ -511,7 +519,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
           ),
-          if (user?.roles != 'Dosen') ...[
+          if (user?.roles == 'Admin') ...[
             ListTile(
               leading: SvgPicture.asset(
                 "assets/svgs/beranda-icon.svg",
@@ -554,6 +562,17 @@ class _MainScreenState extends State<MainScreen> {
               onTap: () => {
                 _onItemTapped(3),
                 _scaffoldKey.currentState?.closeDrawer(),
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.edit_calendar_rounded, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87),
+              title: Text('Penjadwalan Sidang', style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black)),
+              onTap: () {
+                _scaffoldKey.currentState?.closeDrawer();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const PenjadwalanSidangScreen()),
+                );
               },
             ),
           ],
