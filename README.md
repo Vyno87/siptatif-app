@@ -4,7 +4,7 @@ SIPTATIF adalah aplikasi mobile modern berbasis **Flutter** yang dikembangkan un
 
 > **Dikembangkan Oleh Ahmad Novy Mufasir Untuk Universitas Pamulang**
 
-Aplikasi ini menggunakan desain antarmuka premium **Glassmorphism** untuk memberikan *user experience* terbaik dan dihubungkan ke backend lokal (`json-server`) sebagai representasi *database real-time*.
+Aplikasi ini menggunakan desain antarmuka premium **Glassmorphism** untuk memberikan *user experience* terbaik dan telah terhubung secara global (*Cloud-based*) melalui infrastruktur **Vercel Serverless** dan **MongoDB Atlas**.
 
 ---
 
@@ -41,28 +41,24 @@ Sistem ini memfasilitasi tiga peran pengguna yang saling terintegrasi:
 
 ---
 
-## ⚙️ Stack Teknologi
+## ⚙️ Stack Teknologi (Cloud Architecture)
 - **Frontend:** Flutter (Dart) dengan arsitektur `Provider` untuk *State Management*.
-- **Desain UI:** *Glassmorphism styling* (blur efek kaca), mode gelap/terang dinamis, navigasi berbasis *drawer* pintar, serta indikator visual untuk tiap peran.
-- **Backend (Mocking):** `json-server` (Node.js) untuk menyimpan data ke `db.json` dengan API interaktif (GET, POST, PUT, DELETE).
+- **Desain UI:** *Glassmorphism styling* (blur efek kaca), mode gelap/terang dinamis, navigasi berbasis *drawer* pintar, serta indikator visual.
+- **Backend API:** **Vercel Serverless Functions** (Node.js & Express). Skalabel dan tanpa perlu mengatur server fisik.
+- **Database:** **MongoDB Atlas** (NoSQL). Cepat, aman, dan bisa diakses dari mana saja.
 
 ---
 
 ## 🚀 Cara Penggunaan & Testing Aplikasi
 
-1. **Jalankan JSON-Server (Backend)**
-   ```bash
-   cd backend
-   npm run api
-   ```
-   *Pastikan berjalan di port localhost:3000*
-
-2. **Jalankan Aplikasi Flutter**
+1. **Unduh atau Jalankan Aplikasi Flutter**
+   Karena *database* sudah berbasis *Cloud*, Anda tidak perlu menjalankan *server* lokal lagi. Cukup jalankan aplikasi:
    ```bash
    flutter run
    ```
+   Atau pasang *file* `app-release.apk` langsung ke HP Android Anda.
 
-3. **Akun Pengujian (Testing)**
+2. **Akun Pengujian (Testing)**
    Aplikasi memiliki akun-akun pengujian berikut yang siap digunakan:
    - **Admin / Koordinator:** `admin@siptatif.com` | Password: `admin12`
    - **Dosen (Budi):** `budi@siptatif.com` | Password: `dosen123`
@@ -71,5 +67,12 @@ Sistem ini memfasilitasi tiga peran pengguna yang saling terintegrasi:
 
 ---
 
+## ☁️ Deployment Info
+Aplikasi ini di-*hosting* di:
+- **API URL:** `https://siptatif-app-iota.vercel.app`
+- **Database:** `Cluster0.nr0mnpe.mongodb.net` (siptatif_db)
+
+---
+
 ## 🤝 Kontribusi
-Aplikasi ini dirancang sebagai purwarupa (*prototype*). Anda bebas mengembangkan modul-modul lain di masa depan. Silakan diskusikan di menu *Issues* sebelum melakukan *Pull Request* besar-besaran.
+Aplikasi ini dirancang sebagai sistem terintegrasi yang siap pakai. Anda bebas mengembangkan modul-modul lain di masa depan. Silakan diskusikan di menu *Issues* sebelum melakukan *Pull Request* besar-besaran.
