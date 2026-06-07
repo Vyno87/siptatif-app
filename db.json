@@ -1,0 +1,104 @@
+{
+  "mahasiswa": [
+    {
+      "id": "m1",
+      "nama": "Farhan Aulia Pratama",
+      "nim": "12345678",
+      "judulSkripsi": "Sistem Informasi Penjadwalan",
+      "pembimbing": "Dr. Eng. Ir. Budi",
+      "statusBerkas": "Disetujui"
+    },
+    {
+      "id": "m2",
+      "nama": "Budi Santoso",
+      "nim": "12345679",
+      "judulSkripsi": "Analisis Sentimen pada Twitter",
+      "pembimbing": "Dr. Siti Aminah",
+      "statusBerkas": "Diproses"
+    }
+  ],
+  "penguji": [
+    {
+      "id": "p1",
+      "nama": "Dr. Eng. Ir. Budi",
+      "nidn": "0001",
+      "kuotaMaksimal": 10,
+      "kuotaTerisi": 5,
+      "bidangKeahlian": "Software Engineering"
+    }
+  ],
+  "pembimbing": [
+    {
+      "id": "pemb1",
+      "nama": "Dr. Siti Aminah",
+      "nidn": "0002",
+      "kuotaMaksimal": 8,
+      "kuotaTerisi": 2,
+      "bidangKeahlian": "Data Science"
+    }
+  ],
+  "users": [
+    {
+      "id": "u1",
+      "email": "admin@siptatif.com",
+      "password": "admin12",
+      "fullName": "Ahmad Novy Mufasir",
+      "profilePict": "assets/img/novy.jpeg",
+      "roles": "Admin",
+      "nidn": ""
+    },
+    {
+      "id": "u2",
+      "email": "budi@siptatif.com",
+      "password": "dosen123",
+      "fullName": "Dr. Eng. Ir. Budi",
+      "profilePict": "assets/img/default-profile.png",
+      "roles": "Dosen",
+      "nidn": "0001"
+    },
+    {
+      "id": "u3",
+      "email": "siti@siptatif.com",
+      "password": "dosen123",
+      "fullName": "Dr. Siti Aminah",
+      "profilePict": "assets/img/default-profile.png",
+      "roles": "Dosen",
+      "nidn": "0002"
+    },
+    {
+      "id": "u4",
+      "email": "farhan@siptatif.com",
+      "password": "mhs",
+      "fullName": "Farhan Aulia Pratama",
+      "profilePict": "assets/img/default-profile.png",
+      "roles": "Mahasiswa",
+      "nimNidn": "12345678"
+    }
+  ],
+  "notifikasi": [
+    {
+      "id": "1",
+      "judul": "Proposal Disetujui",
+      "pesan": "Proposal Tugas Akhir M. Farhan Aulia Pratama telah disetujui koordinator.",
+      "waktu": "12:30 PM",
+      "isRead": true
+    },
+    {
+      "id": "2",
+      "judul": "Pendaftaran Penguji",
+      "pesan": "Ada 3 pendaftar penguji baru menunggu direview.",
+      "waktu": "09:15 AM",
+      "isRead": true
+    },
+    {
+      "id": "3",
+      "judul": "Peringatan Jadwal",
+      "pesan": "Batas akhir penyerahan nilai adalah besok hari.",
+      "waktu": "Kemarin",
+      "isRead": true
+    }
+  ],
+  "logbooks": [],
+  "sidang": [],
+  "yudisium": []
+}
