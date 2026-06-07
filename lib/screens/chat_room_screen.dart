@@ -62,7 +62,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
             Expanded(child: Text(widget.contactName, style: const TextStyle(fontSize: 16))),
           ],
         ),
-        backgroundColor: Colors.blue800,
+        backgroundColor: Colors.blue[800],
         foregroundColor: Colors.white,
       ),
       body: Container(
@@ -87,7 +87,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                       margin: const EdgeInsets.only(bottom: 8),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
-                        color: isMe ? Colors.blue800 : (isDark ? Colors.grey[800] : Colors.white),
+                        color: isMe ? Colors.blue[800] : (isDark ? Colors.grey[800] : Colors.white),
                         borderRadius: BorderRadius.only(
                           topLeft: const Radius.circular(16),
                           topRight: const Radius.circular(16),
@@ -149,7 +149,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                   ),
                   const SizedBox(width: 8),
                   CircleAvatar(
-                    backgroundColor: Colors.blue800,
+                    backgroundColor: Colors.blue[800],
                     child: IconButton(
                       icon: const Icon(Icons.send, color: Colors.white, size: 20),
                       onPressed: () {
