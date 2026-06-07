@@ -11,13 +11,6 @@ subprojects {
 }
 subprojects {
     project.evaluationDependsOn(':app')
-    afterEvaluate { project ->
-        if (project.hasProperty('android')) {
-            project.android {
-                ndkVersion "29.0.14206865"
-            }
-        }
-    }
 }
 
 tasks.register("clean", Delete) {
