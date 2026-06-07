@@ -5,6 +5,8 @@ import 'package:siptatif_app/providers/auth_provider.dart';
 import 'package:siptatif_app/providers/mahasiswa_provider.dart';
 import 'package:siptatif_app/providers/sidang_provider.dart';
 import 'package:siptatif_app/widgets/glass_card.dart';
+import 'package:signature/signature.dart';
+import 'dart:convert';
 
 class PenilaianSidangScreen extends StatefulWidget {
   const PenilaianSidangScreen({super.key});
@@ -28,12 +30,19 @@ class _PenilaianSidangScreenState extends State<PenilaianSidangScreen> {
       nilaiController.text = sidang.nilaiPenguji2.toString();
     }
 
+    final SignatureController signatureController = SignatureController(
+      penStrokeWidth: 3,
+      penColor: Colors.black,
+      exportBackgroundColor: Colors.transparent,
+    );
+
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: Text('Penilaian Sidang: $namaMhs'),
-          content: Form(
+          content: SingleChildScrollView(
+           child: Form(
             key: formKey,
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -56,6 +65,32 @@ class _PenilaianSidangScreenState extends State<PenilaianSidangScreen> {
                   controller: catatanController,
                   maxLines: 3,
                   decoration: const InputDecoration(labelText: 'Catatan / Revisi (Opsional)', border: OutlineInputBorder()),
+                ),
+                const SizedBox(height: 12),
+                const Text('Tanda Tangan Digital:', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    color: Colors.white,
+                  ),
+                  child: Signature(
+                    controller: signatureController,
+                    height: 120,
+                    backgroundColor: Colors.white,
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton.icon(
+                      icon: const Icon(Icons.clear, size: 16),
+                      label: const Text('Hapus TTD'),
+                      onPressed: () {
+                        signatureController.clear();
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -85,6 +120,20 @@ class _PenilaianSidangScreenState extends State<PenilaianSidangScreen> {
                        sidang.catatanRevisi = '${sidang.catatanRevisi}\n[$peranDosen] ${catatanController.text}';
                     } else {
                        sidang.catatanRevisi = '[$peranDosen] ${catatanController.text}';
+                    }
+                  }
+
+                  if (signatureController.isNotEmpty) {
+                    final signatureBytes = await signatureController.toPngBytes();
+                    if (signatureBytes != null) {
+                      final base64String = base64Encode(signatureBytes);
+                      if (peranDosen == 'Pembimbing') {
+                        sidang.ttdPembimbing = base64String;
+                      } else if (peranDosen == 'Penguji 1') {
+                        sidang.ttdPenguji1 = base64String;
+                      } else if (peranDosen == 'Penguji 2') {
+                        sidang.ttdPenguji2 = base64String;
+                      }
                     }
                   }
 

@@ -12,6 +12,9 @@ class Sidang {
   String? catatanRevisi;
   String? statusKelulusan;
   double? nilaiAkhir;
+  String? ttdPenguji1;
+  String? ttdPenguji2;
+  String? ttdPembimbing;
 
   Sidang({
     this.id,
@@ -27,6 +30,9 @@ class Sidang {
     this.catatanRevisi,
     this.statusKelulusan,
     this.nilaiAkhir,
+    this.ttdPenguji1,
+    this.ttdPenguji2,
+    this.ttdPembimbing,
   });
 
   factory Sidang.fromJson(Map<String, dynamic> json) {
@@ -44,6 +50,9 @@ class Sidang {
       catatanRevisi: json['catatanRevisi'],
       statusKelulusan: json['statusKelulusan'],
       nilaiAkhir: json['nilaiAkhir']?.toDouble(),
+      ttdPenguji1: json['ttdPenguji1'],
+      ttdPenguji2: json['ttdPenguji2'],
+      ttdPembimbing: json['ttdPembimbing'],
     );
   }
 
@@ -62,6 +71,9 @@ class Sidang {
       if (catatanRevisi != null) 'catatanRevisi': catatanRevisi,
       if (statusKelulusan != null) 'statusKelulusan': statusKelulusan,
       if (nilaiAkhir != null) 'nilaiAkhir': nilaiAkhir,
+      if (ttdPenguji1 != null) 'ttdPenguji1': ttdPenguji1,
+      if (ttdPenguji2 != null) 'ttdPenguji2': ttdPenguji2,
+      if (ttdPembimbing != null) 'ttdPembimbing': ttdPembimbing,
     };
   }
 }
