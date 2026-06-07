@@ -53,10 +53,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            CircleAvatar(
+            const CircleAvatar(
               backgroundColor: Colors.white24,
-              child: const Icon(Icons.person, color: Colors.white, size: 20),
               radius: 16,
+              child: Icon(Icons.person, color: Colors.white, size: 20),
             ),
             const SizedBox(width: 10),
             Expanded(child: Text(widget.contactName, style: const TextStyle(fontSize: 16))),
@@ -96,7 +96,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withValues(alpha: 0.05),
                             blurRadius: 5,
                             offset: const Offset(0, 2),
                           )
