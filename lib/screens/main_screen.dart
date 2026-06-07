@@ -12,6 +12,7 @@ import 'package:siptatif_app/screens/mahasiswa_screen.dart';
 import 'package:siptatif_app/screens/penguji_screen.dart';
 import 'package:siptatif_app/screens/pembimbing_screen.dart';
 import 'package:siptatif_app/screens/pengaturan_screen.dart';
+import 'package:siptatif_app/screens/chat_list_screen.dart';
 
 import 'package:provider/provider.dart';
 import 'package:siptatif_app/providers/auth_provider.dart';
@@ -39,12 +40,14 @@ class _MainScreenState extends State<MainScreen> {
 
   List<Widget> get _dosenWidgetBody => [
     const DosenScreen(),
+    const ChatListScreen(),
     const PengaturanScreen(),
   ];
 
   List<Widget> get _mahasiswaWidgetBody => [
     const LogbookMahasiswaScreen(),
     const PendaftaranSidangScreen(),
+    const ChatListScreen(),
     const PengaturanScreen(),
   ];
 
@@ -180,7 +183,7 @@ class _MainScreenState extends State<MainScreen> {
           border: Border(top: BorderSide(color: Theme.of(context).dividerColor, width: 1.0))),
       child: BottomNavigationBar(
         elevation: 30,
-        currentIndex: _selectedIndex.clamp(0, 1),
+        currentIndex: _selectedIndex.clamp(0, 2),
         onTap: _onItemTapped,
         type: BottomNavigationBarType.fixed,
         showSelectedLabels: true,
@@ -208,6 +211,11 @@ class _MainScreenState extends State<MainScreen> {
             label: 'Mahasiswa Saya',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.chat_bubble_outline),
+            activeIcon: Icon(Icons.chat_bubble_rounded),
+            label: 'Pesan',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.settings_outlined),
             activeIcon: Icon(Icons.settings_rounded),
             label: 'Pengaturan',
@@ -223,7 +231,7 @@ class _MainScreenState extends State<MainScreen> {
           border: Border(top: BorderSide(color: Theme.of(context).dividerColor, width: 1.0))),
       child: BottomNavigationBar(
         elevation: 30,
-        currentIndex: _selectedIndex.clamp(0, 1),
+        currentIndex: _selectedIndex.clamp(0, 3),
         onTap: _onItemTapped,
         type: BottomNavigationBarType.fixed,
         showSelectedLabels: true,
@@ -248,12 +256,17 @@ class _MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.history_edu_outlined),
             activeIcon: Icon(Icons.history_edu_rounded),
-            label: 'Logbook Saya',
+            label: 'Logbook',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.school_outlined),
-            activeIcon: Icon(Icons.school_rounded),
-            label: 'Sidang',
+            icon: Icon(Icons.assignment_outlined),
+            activeIcon: Icon(Icons.assignment_rounded),
+            label: 'Tugas Akhir',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat_bubble_outline),
+            activeIcon: Icon(Icons.chat_bubble_rounded),
+            label: 'Pesan',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings_outlined),

@@ -25,6 +25,7 @@ import 'package:siptatif_app/providers/logbook_provider.dart';
 import 'package:siptatif_app/providers/sidang_provider.dart';
 import 'package:siptatif_app/providers/yudisium_provider.dart';
 import 'package:siptatif_app/providers/theme_provider.dart';
+import 'package:siptatif_app/providers/chat_provider.dart';
 
 void main() {
   runApp(const MainApp());
@@ -51,6 +52,7 @@ class _MainAppState extends State<MainApp> {
         ChangeNotifierProvider(create: (_) => LogbookProvider()),
         ChangeNotifierProvider(create: (_) => SidangProvider()),
         ChangeNotifierProvider(create: (_) => YudisiumProvider()),
+        ChangeNotifierProvider(create: (_) => ChatProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {

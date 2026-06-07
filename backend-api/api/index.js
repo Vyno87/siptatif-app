@@ -33,6 +33,7 @@ const Notifikasi = mongoose.model('Notifikasi', new mongoose.Schema({}, { strict
 const Logbook = mongoose.model('Logbook', new mongoose.Schema({}, { strict: false }));
 const Sidang = mongoose.model('Sidang', new mongoose.Schema({}, { strict: false }));
 const Yudisium = mongoose.model('Yudisium', new mongoose.Schema({}, { strict: false }));
+const Chat = mongoose.model('Chat', new mongoose.Schema({}, { strict: false }));
 
 // Helper to auto-generate standard REST API Routes (CRUD)
 const createCrudRoutes = (model, path) => {
@@ -106,6 +107,7 @@ createCrudRoutes(Notifikasi, 'notifikasi');
 createCrudRoutes(Logbook, 'logbooks');
 createCrudRoutes(Sidang, 'sidang');
 createCrudRoutes(Yudisium, 'yudisium');
+createCrudRoutes(Chat, 'chats');
 
 app.get('/', (req, res) => {
   res.send('SIPTATIF Backend API is Running on Vercel!');
