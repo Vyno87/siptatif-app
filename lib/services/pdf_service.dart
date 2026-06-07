@@ -31,7 +31,7 @@ class PdfService {
 
     await Printing.layoutPdf(
       onLayout: (PdfPageFormat format) async => pdf.save(),
-      name: 'Laporan_Sidang_SIPTATIF.pdf',
+      name: 'Laporan_Tugas_Akhir.pdf',
     );
   }
 
@@ -56,7 +56,7 @@ class PdfService {
   static pw.Widget _buildTitle() {
     return pw.Center(
       child: pw.Text(
-        "REKAPITULASI LAPORAN SIDANG TUGAS AKHIR",
+        "REKAPITULASI PENDAFTARAN TUGAS AKHIR",
         style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
       ),
     );
@@ -64,35 +64,18 @@ class PdfService {
 
   static pw.Widget _buildTable(List<Mahasiswa> data) {
     return pw.TableHelper.fromTextArray(
-      headers: ['No', 'NIM', 'Nama Mahasiswa', 'Judul TA', 'Nilai', 'Predikat', 'Status'],
+      headers: ['No', 'NIM', 'Nama Mahasiswa', 'Judul TA', 'Dosen Pembimbing', 'Status'],
       data: List<List<dynamic>>.generate(
         data.length,
         (index) {
           final mhs = data[index];
-          // Calculate average score if available
-          double total = 0;
-          if (mhs.komponenNilai != null && mhs.komponenNilai!.isNotEmpty) {
-             double p1 = mhs.komponenNilai!['pembimbing1'] ?? 0;
-             double uj1 = mhs.komponenNilai!['penguji1'] ?? 0;
-             double uj2 = mhs.komponenNilai!['penguji2'] ?? 0;
-             total = (p1 + uj1 + uj2) / 3;
-          }
-          String nilaiStr = total > 0 ? total.toStringAsFixed(2) : '-';
-          
-          String predikat = '-';
-          if (total >= 80) predikat = 'A';
-          else if (total >= 70) predikat = 'B';
-          else if (total >= 60) predikat = 'C';
-          else if (total > 0) predikat = 'D';
-
           return [
             index + 1,
-            mhs.nimNidn,
-            mhs.fullName,
-            mhs.judulTa ?? '-',
-            nilaiStr,
-            predikat,
-            mhs.statusUjian ?? 'Belum Ujian',
+            mhs.nim,
+            mhs.nama,
+            mhs.judulTugasAkhir,
+            mhs.calonDosenPembimbing1,
+            mhs.statusBerkas,
           ];
         },
       ),
@@ -106,20 +89,21 @@ class PdfService {
       cellAlignments: {
         2: pw.Alignment.centerLeft, // Nama
         3: pw.Alignment.centerLeft, // Judul
+        4: pw.Alignment.centerLeft, // Dosen
       },
       columnWidths: {
         0: const pw.FixedColumnWidth(25),
         1: const pw.FixedColumnWidth(60),
         2: const pw.FlexColumnWidth(2),
         3: const pw.FlexColumnWidth(3),
-        4: const pw.FixedColumnWidth(40),
-        5: const pw.FixedColumnWidth(50),
-        6: const pw.FixedColumnWidth(70),
+        4: const pw.FlexColumnWidth(2),
+        5: const pw.FixedColumnWidth(60),
       }
     );
   }
 
   static pw.Widget _buildFooter(pw.Context context) {
+    String tgl = DateFormat('dd MMMM yyyy').format(DateTime.now());
     return pw.Column(
       mainAxisSize: pw.MainAxisSize.min,
       crossAxisAlignment: pw.CrossAxisAlignment.end,
@@ -127,17 +111,17 @@ class PdfService {
         pw.Divider(),
         pw.SizedBox(height: 10),
         pw.Text(
-          'Tangerang Selatan, \${DateFormat('dd MMMM yyyy').format(DateTime.now())}',
+          "Tangerang Selatan, $tgl",
           style: const pw.TextStyle(fontSize: 10),
         ),
         pw.SizedBox(height: 50),
         pw.Text(
-          'Koordinator Tugas Akhir',
+          "Koordinator Tugas Akhir",
           style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
         ),
         pw.SizedBox(height: 5),
         pw.Text(
-          'Halaman \${context.pageNumber} dari \${context.pagesCount}',
+          "Halaman ${context.pageNumber} dari ${context.pagesCount}",
           style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey),
         ),
       ]
