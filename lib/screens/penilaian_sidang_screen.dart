@@ -126,9 +126,13 @@ class _PenilaianSidangScreenState extends State<PenilaianSidangScreen> {
       try {
         final mhs = mhsProvider.listMahasiswa.firstWhere((m) => m.nim == sidang.mahasiswaId);
         String peran = '';
-        if (mhs.dosenPembimbing == user?.fullName) peran = 'Pembimbing';
-        else if (mhs.dosenPenguji1 == user?.fullName) peran = 'Penguji 1';
-        else if (mhs.dosenPenguji2 == user?.fullName) peran = 'Penguji 2';
+        if (mhs.calonDosenPembimbing1 == user?.fullName || mhs.calonDosenPembimbing2 == user?.fullName) {
+          peran = 'Pembimbing';
+        } else if (mhs.dosenPenguji1 == user?.fullName) {
+          peran = 'Penguji 1';
+        } else if (mhs.dosenPenguji2 == user?.fullName) {
+          peran = 'Penguji 2';
+        }
 
         if (peran.isNotEmpty) {
           sidangTerkait.add({

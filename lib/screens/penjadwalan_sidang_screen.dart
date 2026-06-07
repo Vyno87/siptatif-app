@@ -116,11 +116,17 @@ class _PenjadwalanSidangScreenState extends State<PenjadwalanSidangScreen> {
 
     final sidangList = sidangProvider.listSidang;
 
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Penjadwalan Sidang'),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
             decoration: BoxDecoration(
@@ -199,6 +205,7 @@ class _PenjadwalanSidangScreenState extends State<PenjadwalanSidangScreen> {
                   ),
           ),
         ],
+      ),
       ),
     );
   }

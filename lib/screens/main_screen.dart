@@ -391,10 +391,15 @@ class _MainScreenState extends State<MainScreen> {
                       ],
                     ));
           },
-          child: CircleAvatar(
-            backgroundImage: AssetImage(user?.profilePict ?? ''),
-            radius: 20,
-          ),
+          child: (user != null && user.profilePict.isNotEmpty)
+              ? CircleAvatar(
+                  backgroundImage: AssetImage(user.profilePict),
+                  radius: 20,
+                )
+              : const CircleAvatar(
+                  radius: 20,
+                  child: Icon(Icons.person),
+                ),
         ),
         // Icon(
         //   Icons.account_circle_rounded,
@@ -449,10 +454,15 @@ class _MainScreenState extends State<MainScreen> {
                                 builder: (_) => PreviewProfilePictDialog(
                                     imgFile: user?.profilePict ?? ''));
                           },
-                          child: CircleAvatar(
-                            backgroundImage: AssetImage(user?.profilePict ?? ''),
-                            radius: 33,
-                          ),
+                          child: (user != null && user.profilePict.isNotEmpty)
+                              ? CircleAvatar(
+                                  backgroundImage: AssetImage(user.profilePict),
+                                  radius: 33,
+                                )
+                              : const CircleAvatar(
+                                  radius: 33,
+                                  child: Icon(Icons.person, size: 40),
+                                ),
                         ),
                         const Spacer(
                           flex: 90,
@@ -576,6 +586,14 @@ class _MainScreenState extends State<MainScreen> {
                 );
               },
             ),
+            ListTile(
+              leading: Icon(Icons.verified_user_rounded, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87),
+              title: Text('Manajemen Yudisium', style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black)),
+              onTap: () {
+                _scaffoldKey.currentState?.closeDrawer();
+                Navigator.pushNamed(context, "/manajemen-yudisium");
+              },
+            ),
           ],
           const Divider(),
           ListTile(
@@ -598,7 +616,7 @@ class _MainScreenState extends State<MainScreen> {
                 context: context,
                 builder: (context) => AlertDialog(
                   title: const Text('SIPTATIF v1.0'),
-                  content: const Text('Sistem Informasi Penjadwalan Tugas Akhir Teknik Informatika (SIPTATIF).\n\nDikembangkan untuk Universitas Pamulang.'),
+                  content: const Text('Sistem Informasi Penjadwalan Tugas Akhir Teknik Informatika (SIPTATIF).\n\nDikembangkan Oleh Ahmad Novy Mufasir Untuk Universitas Pamulang.'),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
@@ -619,6 +637,24 @@ class _MainScreenState extends State<MainScreen> {
                   context,
                   MaterialPageRoute(builder: (context) => const PenilaianSidangScreen()),
                 );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.assignment_turned_in_rounded, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87),
+              title: Text('Persetujuan Yudisium', style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black)),
+              onTap: () {
+                _scaffoldKey.currentState?.closeDrawer();
+                Navigator.pushNamed(context, "/pengesahan-revisi");
+              },
+            ),
+          ],
+          if (user?.roles == 'Mahasiswa') ...[
+            ListTile(
+              leading: Icon(Icons.workspace_premium_rounded, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87),
+              title: Text('Yudisium & Kelulusan', style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black)),
+              onTap: () {
+                _scaffoldKey.currentState?.closeDrawer();
+                Navigator.pushNamed(context, "/yudisium-mahasiswa");
               },
             ),
           ],

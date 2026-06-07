@@ -11,6 +11,9 @@ import 'package:siptatif_app/screens/reset_password_screen.dart';
 import 'package:siptatif_app/screens/tambah_pembimbing.dart';
 import 'package:siptatif_app/screens/tambah_penguji.dart';
 import 'package:siptatif_app/screens/tambah_mahasiswa_screen.dart';
+import 'package:siptatif_app/screens/yudisium_mahasiswa_screen.dart';
+import 'package:siptatif_app/screens/pengesahan_revisi_screen.dart';
+import 'package:siptatif_app/screens/manajemen_yudisium_screen.dart';
 
 import 'package:provider/provider.dart';
 import 'package:siptatif_app/providers/auth_provider.dart';
@@ -20,6 +23,7 @@ import 'package:siptatif_app/providers/pembimbing_provider.dart';
 import 'package:siptatif_app/providers/penguji_provider.dart';
 import 'package:siptatif_app/providers/logbook_provider.dart';
 import 'package:siptatif_app/providers/sidang_provider.dart';
+import 'package:siptatif_app/providers/yudisium_provider.dart';
 import 'package:siptatif_app/providers/theme_provider.dart';
 
 void main() {
@@ -46,6 +50,7 @@ class _MainAppState extends State<MainApp> {
         ChangeNotifierProvider(create: (_) => NotifikasiProvider()),
         ChangeNotifierProvider(create: (_) => LogbookProvider()),
         ChangeNotifierProvider(create: (_) => SidangProvider()),
+        ChangeNotifierProvider(create: (_) => YudisiumProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
@@ -64,6 +69,9 @@ class _MainAppState extends State<MainApp> {
                 case "/tambah-pembimbing": page = const PembimbingTambahScreen(); break;
                 case "/penguji-update-screen": page = const PengujiUpdateScreen(); break;
                 case "/pembimbing-update-screen": page = const PembimbingUpdateScreen(); break;
+                case "/yudisium-mahasiswa": page = const YudisiumMahasiswaScreen(); break;
+                case "/pengesahan-revisi": page = const PengesahanRevisiScreen(); break;
+                case "/manajemen-yudisium": page = const ManajemenYudisiumScreen(); break;
                 default: page = const AuthWrapper();
               }
               return PageRouteBuilder(
