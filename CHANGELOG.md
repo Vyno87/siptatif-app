@@ -6,7 +6,7 @@ Format pencatatan ini berdasarkan pada panduan [Keep a Changelog](https://keepac
 
 ---
 
-## [2.0.0] - 2026-06-07
+## [2.0.1] - 2026-06-07
 ### 🚀 Fitur Baru & Peningkatan Desain (Major Update)
 Pembaruan skala besar ini difokuskan pada perombakan total *User Interface* (UI) menjadi desain **Premium Glassmorphism**, memberikan sensasi visual ala aplikasi *startup unicorn* modern.
 - **Global App Theme**: Implementasi tema gradien neon gelap (*Dark Glass Gradient*) dan terang secara dinamis yang menyesuaikan preferensi perangkat pengguna.
