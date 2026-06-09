@@ -76,7 +76,7 @@ class AuthProvider extends ChangeNotifier {
         return false;
       }
     } catch (e) {
-      _errorMessage = 'Terjadi kesalahan jaringan.';
+      _errorMessage = 'Error: $e';
       return false;
     } finally {
       _isLoading = false;
@@ -167,8 +167,9 @@ class AuthProvider extends ChangeNotifier {
       final file = File(filePath);
       final storageRef = FirebaseStorage.instance.ref().child('profile_pictures/${_currentUser!.id}.jpg');
       
-      // Upload ke Firebase Storage
-      final uploadTask = await storageRef.putFile(file);
+      // Upload ke Firebase Storage menggunakan putData (lebih stabil untuk file cache ImagePicker)
+      final bytes = await file.readAsBytes();
+      final uploadTask = await storageRef.putData(bytes);
       final downloadUrl = await uploadTask.ref.getDownloadURL();
 
       // Update ke Firestore
