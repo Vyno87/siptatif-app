@@ -741,7 +741,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
           ),
-          if (user?.roles == 'Admin') ...[
+          if (user?.roles == 'Admin' || user?.roles == 'Koordinator TA') ...[
             ListTile(
               leading: SvgPicture.asset(
                 "assets/svgs/beranda-icon.svg",

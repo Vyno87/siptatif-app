@@ -16,7 +16,7 @@ class User {
       email: json['email'] ?? '',
       fullName: json['fullName'],
       profilePict: json['profilePict'] ?? '',
-      roles: json['roles'] ?? '',
+      roles: json['roles'] ?? json['role'] ?? '',
       password: json['password'],
       nimNidn: json['nimNidn']?.toString(),
     );

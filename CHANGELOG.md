@@ -6,6 +6,13 @@ Format pencatatan ini berdasarkan pada panduan [Keep a Changelog](https://keepac
 
 ---
 
+## [2.0.2] - 2026-06-09
+### 🐛 Perbaikan Bug & Optimasi (Hotfix)
+- **Role System**: Memperbaiki masalah mapping role database (`role` menjadi `roles`) sehingga akun dengan akses `Koordinator TA` kini dapat mengakses dashboard dan menu Admin secara penuh.
+- **State Management**: Memperbaiki bug UI di mana pesan *error* terkait gagal unggah foto profil (misalnya akibat penolakan *Firebase Storage Rules*) tersangkut dan terus muncul di layar Login setelah pengguna melakukan *logout*.
+
+---
+
 ## [2.0.1] - 2026-06-07
 ### 🚀 Fitur Baru & Peningkatan Desain (Major Update)
 Pembaruan skala besar ini difokuskan pada perombakan total *User Interface* (UI) menjadi desain **Premium Glassmorphism**, memberikan sensasi visual ala aplikasi *startup unicorn* modern.
