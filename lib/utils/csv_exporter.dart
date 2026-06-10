@@ -32,7 +32,7 @@ class CsvExporter {
         ]);
       }
 
-      String csvData = const ListToCsvConverter().convert(rows);
+      String csvData = const CsvEncoder().convert(rows);
 
       // Dapatkan direktori penyimpanan dokumen
       final directory = await getApplicationDocumentsDirectory();
