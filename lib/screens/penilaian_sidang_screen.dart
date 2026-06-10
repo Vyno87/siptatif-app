@@ -6,8 +6,8 @@ import 'package:siptatif_app/providers/mahasiswa_provider.dart';
 import 'package:siptatif_app/providers/sidang_provider.dart';
 import 'package:siptatif_app/widgets/glass_card.dart';
 import 'package:siptatif_app/screens/qr_scanner_screen.dart';
-import 'package:signature/signature.dart';
 import 'dart:convert';
+import 'dart:typed_data';
 
 class PenilaianSidangScreen extends StatefulWidget {
   const PenilaianSidangScreen({super.key});
@@ -21,6 +21,7 @@ class _PenilaianSidangScreenState extends State<PenilaianSidangScreen> {
     final formKey = GlobalKey<FormState>();
     final nilaiController = TextEditingController();
     final catatanController = TextEditingController(text: sidang.catatanRevisi ?? '');
+    Uint8List? signatureBytes;
 
     // Set nilai awal jika sudah pernah diinput
     if (peranDosen == 'Pembimbing' && sidang.nilaiPembimbing != null) {
@@ -30,12 +31,6 @@ class _PenilaianSidangScreenState extends State<PenilaianSidangScreen> {
     } else if (peranDosen == 'Penguji 2' && sidang.nilaiPenguji2 != null) {
       nilaiController.text = sidang.nilaiPenguji2.toString();
     }
-
-    final SignatureController signatureController = SignatureController(
-      penStrokeWidth: 3,
-      penColor: Colors.black,
-      exportBackgroundColor: Colors.transparent,
-    );
 
     showDialog(
       context: context,
@@ -70,28 +65,46 @@ class _PenilaianSidangScreenState extends State<PenilaianSidangScreen> {
                 const SizedBox(height: 12),
                 const Text('Tanda Tangan Digital:', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    color: Colors.white,
-                  ),
-                  child: Signature(
-                    controller: signatureController,
-                    height: 120,
-                    backgroundColor: Colors.white,
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton.icon(
-                      icon: const Icon(Icons.clear, size: 16),
-                      label: const Text('Hapus TTD'),
-                      onPressed: () {
-                        signatureController.clear();
-                      },
-                    ),
-                  ],
+                StatefulBuilder(
+                  builder: (context, setDialogState) {
+                    return Column(
+                      children: [
+                        if (signatureBytes != null) ...[
+                          Container(
+                            height: 120,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey),
+                              color: Colors.white,
+                            ),
+                            child: Image.memory(signatureBytes!),
+                          ),
+                          TextButton.icon(
+                            icon: const Icon(Icons.clear, size: 16),
+                            label: const Text('Hapus TTD'),
+                            onPressed: () {
+                              setDialogState(() {
+                                signatureBytes = null;
+                              });
+                            },
+                          ),
+                        ] else ...[
+                          OutlinedButton.icon(
+                            onPressed: () async {
+                              final result = await Navigator.pushNamed(context, '/signature');
+                              if (result != null && result is Uint8List) {
+                                setDialogState(() {
+                                  signatureBytes = result;
+                                });
+                              }
+                            },
+                            icon: const Icon(Icons.draw),
+                            label: const Text('Buka Canvas Tanda Tangan'),
+                          ),
+                        ]
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
@@ -125,17 +138,14 @@ class _PenilaianSidangScreenState extends State<PenilaianSidangScreen> {
                     }
                   }
 
-                  if (signatureController.isNotEmpty) {
-                    final signatureBytes = await signatureController.toPngBytes();
-                    if (signatureBytes != null) {
-                      final base64String = base64Encode(signatureBytes);
-                      if (peranDosen == 'Pembimbing') {
-                        sidang.ttdPembimbing = base64String;
-                      } else if (peranDosen == 'Penguji 1') {
-                        sidang.ttdPenguji1 = base64String;
-                      } else if (peranDosen == 'Penguji 2') {
-                        sidang.ttdPenguji2 = base64String;
-                      }
+                  if (signatureBytes != null) {
+                    final base64String = base64Encode(signatureBytes!);
+                    if (peranDosen == 'Pembimbing') {
+                      sidang.ttdPembimbing = base64String;
+                    } else if (peranDosen == 'Penguji 1') {
+                      sidang.ttdPenguji1 = base64String;
+                    } else if (peranDosen == 'Penguji 2') {
+                      sidang.ttdPenguji2 = base64String;
                     }
                   }
 

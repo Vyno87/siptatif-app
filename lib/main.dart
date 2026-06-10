@@ -15,6 +15,7 @@ import 'package:siptatif_app/screens/tambah_penguji.dart';
 import 'package:siptatif_app/screens/tambah_mahasiswa_screen.dart';
 import 'package:siptatif_app/screens/yudisium_mahasiswa_screen.dart';
 import 'package:siptatif_app/screens/pengesahan_revisi_screen.dart';
+import 'package:siptatif_app/screens/signature_screen.dart';
 import 'package:siptatif_app/screens/manajemen_yudisium_screen.dart';
 
 import 'package:provider/provider.dart';
@@ -100,6 +101,7 @@ class _MainAppState extends State<MainApp> {
                 case "/pembimbing-update-screen": page = const PembimbingUpdateScreen(); break;
                 case "/yudisium-mahasiswa": page = const YudisiumMahasiswaScreen(); break;
                 case "/pengesahan-revisi": page = const PengesahanRevisiScreen(); break;
+                case "/signature": page = const SignatureScreen(); break;
                 case "/manajemen-yudisium": page = const ManajemenYudisiumScreen(); break;
                 default: page = const AuthWrapper();
               }

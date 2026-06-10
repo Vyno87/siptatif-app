@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:siptatif_app/providers/mahasiswa_provider.dart';
 import 'package:siptatif_app/widgets/mahasiswa_card.dart';
 import 'package:siptatif_app/utils/app_theme.dart';
+import 'package:siptatif_app/utils/csv_exporter.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class MahasiswaScreen extends StatelessWidget {
@@ -42,6 +43,41 @@ class MahasiswaScreen extends StatelessWidget {
                 hintStyle: TextStyle(color: isDark ? Colors.white54 : Colors.black54),
               ),
             ).animate().fade(duration: 500.ms).slideY(begin: -0.2, end: 0),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    if (provider.listMahasiswa.isNotEmpty) {
+                      try {
+                        await CsvExporter.exportMahasiswa(provider.listMahasiswa);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Laporan CSV berhasil diekspor!')),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Gagal mengekspor: $e')),
+                          );
+                        }
+                      }
+                    }
+                  },
+                  icon: const Icon(Icons.file_download, color: Colors.white, size: 18),
+                  label: const Text(
+                    'Ekspor Laporan (CSV)',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green.shade600,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                ).animate().fade(delay: 600.ms).slideX(begin: 0.2, end: 0),
+              ],
+            ),
             const SizedBox(height: 14),
             if (provider.isLoading)
               const Center(child: CircularProgressIndicator())
