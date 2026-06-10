@@ -59,7 +59,12 @@ class _MainScreenState extends State<MainScreen> {
 
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: source, imageQuality: 50);
+    final pickedFile = await picker.pickImage(
+      source: source,
+      imageQuality: 50,
+      maxWidth: 500,
+      maxHeight: 500,
+    );
 
     if (pickedFile != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
