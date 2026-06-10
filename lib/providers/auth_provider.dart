@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:siptatif_app/datas/models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 
 class AuthProvider extends ChangeNotifier {
   User? _currentUser;
@@ -165,14 +164,11 @@ class AuthProvider extends ChangeNotifier {
 
     try {
       final file = File(filePath);
-      final storageRef = FirebaseStorage.instance.ref().child('profile_pictures/${_currentUser!.id}.jpg');
-      
-      // Upload ke Firebase Storage menggunakan putData (lebih stabil untuk file cache ImagePicker)
       final bytes = await file.readAsBytes();
-      final uploadTask = await storageRef.putData(bytes);
-      final downloadUrl = await uploadTask.ref.getDownloadURL();
+      final base64Image = base64Encode(bytes);
+      final downloadUrl = 'data:image/jpeg;base64,$base64Image';
 
-      // Update ke Firestore
+      // Simpan langsung ke Firestore tanpa Firebase Storage
       await FirebaseFirestore.instance.collection('users').doc(_currentUser!.id).update({
         'profilePict': downloadUrl
       });

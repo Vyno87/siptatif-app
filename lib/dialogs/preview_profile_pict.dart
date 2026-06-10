@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:ui';
+import 'dart:convert';
 
 class PreviewProfilePictDialog extends StatelessWidget {
   final String imgFile;
@@ -13,6 +14,8 @@ class PreviewProfilePictDialog extends StatelessWidget {
     if (imgFile.isNotEmpty) {
       if (imgFile.startsWith('http')) {
         imageProvider = NetworkImage(imgFile);
+      } else if (imgFile.startsWith('data:image')) {
+        imageProvider = MemoryImage(base64Decode(imgFile.split(',').last));
       } else {
         imageProvider = AssetImage(imgFile);
       }

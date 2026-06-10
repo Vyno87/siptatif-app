@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:siptatif_app/dialogs/preview_profile_pict.dart';
 import 'package:image_picker/image_picker.dart';
@@ -598,7 +599,9 @@ class _MainScreenState extends State<MainScreen> {
               ? CircleAvatar(
                   backgroundImage: user.profilePict.startsWith('http') 
                       ? NetworkImage(user.profilePict) as ImageProvider
-                      : AssetImage(user.profilePict),
+                      : user.profilePict.startsWith('data:image')
+                          ? MemoryImage(base64Decode(user.profilePict.split(',').last)) as ImageProvider
+                          : AssetImage(user.profilePict),
                   radius: 20,
                 )
               : const CircleAvatar(
@@ -667,7 +670,9 @@ class _MainScreenState extends State<MainScreen> {
                               ? CircleAvatar(
                                   backgroundImage: user.profilePict.startsWith('http')
                                       ? NetworkImage(user.profilePict) as ImageProvider
-                                      : AssetImage(user.profilePict),
+                                      : user.profilePict.startsWith('data:image')
+                                          ? MemoryImage(base64Decode(user.profilePict.split(',').last)) as ImageProvider
+                                          : AssetImage(user.profilePict),
                                   radius: 33,
                                 )
                               : const CircleAvatar(
