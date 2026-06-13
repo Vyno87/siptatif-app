@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:siptatif_app/datas/models/chat.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatProvider extends ChangeNotifier {
   List<Chat> _chats = [];
@@ -20,7 +22,7 @@ class ChatProvider extends ChangeNotifier {
         .collection('chats')
         .orderBy('timestamp')
         .snapshots()
-        .listen((snapshot) {
+        .listen((snapshot) async {
           _chats = snapshot.docs.map((doc) {
             final data = doc.data();
             data['id'] = doc.id;
@@ -29,8 +31,26 @@ class ChatProvider extends ChangeNotifier {
           
           isLoading = false;
           notifyListeners();
-        }, onError: (e) {
-          errorMessage = "Terjadi kesalahan saat memuat chat.";
+
+          // Simpan data chat terbaru ke local cache
+          final prefs = await SharedPreferences.getInstance();
+          final String encodedData = jsonEncode(_chats.map((e) => e.toJson()).toList());
+          await prefs.setString('offline_chats', encodedData);
+
+        }, onError: (e) async {
+          try {
+            final prefs = await SharedPreferences.getInstance();
+            final String? cachedData = prefs.getString('offline_chats');
+            if (cachedData != null) {
+              final List<dynamic> decodedData = jsonDecode(cachedData);
+              _chats = decodedData.map((e) => Chat.fromJson(e)).toList();
+              errorMessage = "Mode Offline: Menampilkan riwayat chat tersimpan.";
+            } else {
+              errorMessage = "Terjadi kesalahan saat memuat chat: $e";
+            }
+          } catch (cacheError) {
+            errorMessage = "Terjadi kesalahan saat memuat chat: $e";
+          }
           isLoading = false;
           notifyListeners();
         });

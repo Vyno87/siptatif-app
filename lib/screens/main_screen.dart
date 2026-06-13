@@ -296,9 +296,12 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              Navigator.pushReplacementNamed(context, "/login");
+              await context.read<AuthProvider>().logout();
+              if (context.mounted) {
+                Navigator.pushReplacementNamed(context, "/login");
+              }
             },
             style: ButtonStyle(
               backgroundColor: WidgetStateProperty.all(Colors.green),

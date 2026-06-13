@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:siptatif_app/datas/models/logbook.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LogbookProvider extends ChangeNotifier {
   List<Logbook> _listLogbook = [];
@@ -27,8 +29,27 @@ class LogbookProvider extends ChangeNotifier {
         data['id'] = doc.id;
         return Logbook.fromJson(data);
       }).toList();
+
+      // Simpan data ke local cache
+      final prefs = await SharedPreferences.getInstance();
+      final String encodedData = jsonEncode(_listLogbook.map((e) => e.toJson()).toList());
+      await prefs.setString('offline_logbook', encodedData);
+
     } catch (e) {
-      _errorMessage = 'Gagal memuat data logbook: $e';
+      // Ambil data dari local cache jika offline
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final String? cachedData = prefs.getString('offline_logbook');
+        if (cachedData != null) {
+          final List<dynamic> decodedData = jsonDecode(cachedData);
+          _listLogbook = decodedData.map((e) => Logbook.fromJson(e)).toList();
+          _errorMessage = 'Mode Offline: Menampilkan data logbook tersimpan.';
+        } else {
+          _errorMessage = 'Gagal memuat data logbook: $e';
+        }
+      } catch (cacheError) {
+        _errorMessage = 'Gagal memuat data logbook: $e';
+      }
     } finally {
       _isLoading = false;
       notifyListeners();
