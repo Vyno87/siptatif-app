@@ -63,12 +63,25 @@ class AuthProvider extends ChangeNotifier {
         final userData = doc.data() as Map<String, dynamic>;
         userData['id'] = doc.id; // Inject ID
         
+        final tempUser = User.fromJson(userData);
+        
+        // Pengecekan Admin Hardcode
+        if (tempUser.email == 'vynothea7@gmail.com') {
+          tempUser.roles = 'Admin';
+          tempUser.status = 'approved';
+          userData['roles'] = 'Admin';
+          userData['status'] = 'approved';
+        } else if (tempUser.status == 'pending') {
+          _errorMessage = 'Akun Anda sedang menunggu persetujuan Admin.';
+          return false;
+        }
+
         final prefs = await SharedPreferences.getInstance();
         
         // Simpan data user ke SharedPreferences
         await prefs.setString('user_profile', jsonEncode(userData));
 
-        _currentUser = User.fromJson(userData);
+        _currentUser = tempUser;
         return true;
       } else {
         _errorMessage = 'Email atau password salah!';

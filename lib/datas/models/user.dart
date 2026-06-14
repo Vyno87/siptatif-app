@@ -7,8 +7,18 @@ class User {
   String roles;
   String? password;
   String? nimNidn;
+  String status;
 
-  User({this.id, required this.email, this.fullName, required this.profilePict, required this.roles, this.password, this.nimNidn});
+  User({
+    this.id, 
+    required this.email, 
+    this.fullName, 
+    required this.profilePict, 
+    required this.roles, 
+    this.password, 
+    this.nimNidn, 
+    this.status = 'pending'
+  });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
@@ -19,6 +29,7 @@ class User {
       roles: json['roles'] ?? json['role'] ?? '',
       password: json['password'],
       nimNidn: json['nimNidn']?.toString(),
+      status: json['status'] ?? 'approved', // Default 'approved' for old users without status
     );
   }
 
@@ -31,6 +42,7 @@ class User {
       'roles': roles,
       if (password != null) 'password': password,
       if (nimNidn != null) 'nimNidn': nimNidn,
+      'status': status,
     };
   }
 }

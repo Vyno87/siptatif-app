@@ -22,6 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   
   bool passwordVisible = false;
   bool confirmPasswordVisible = false;
+  String _selectedRole = 'Mahasiswa';
 
   @override
   void dispose() {
@@ -102,6 +103,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ).animate().fade(delay: 400.ms).slideX(begin: -0.2, end: 0),
                       const SizedBox(height: 15),
+                      // Dropdown Role
+                      SizedBox(
+                        width: double.infinity,
+                        child: DropdownButtonFormField<String>(
+                          value: _selectedRole,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15.0),
+                              borderSide: BorderSide.none,
+                            ),
+                            filled: true,
+                            fillColor: isDark ? Colors.black26 : Colors.white60,
+                            prefixIcon: const Icon(Icons.work),
+                          ),
+                          dropdownColor: isDark ? Colors.grey[850] : Colors.white,
+                          items: <String>['Mahasiswa', 'Dosen'].map((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                          onChanged: (newValue) {
+                            setState(() {
+                              _selectedRole = newValue!;
+                              _nimController.clear();
+                            });
+                          },
+                        ),
+                      ).animate().fade(delay: 425.ms).slideX(begin: -0.2, end: 0),
+                      const SizedBox(height: 15),
                       SizedBox(
                         width: double.infinity,
                         child: TextFormField(
@@ -113,11 +144,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                             filled: true,
                             fillColor: isDark ? Colors.black26 : Colors.white60,
-                            hintText: 'NIM / NIDN',
+                            hintText: _selectedRole == 'Mahasiswa' ? 'Masukkan NIM' : 'Masukkan NIDN',
                             prefixIcon: const Icon(Icons.badge),
                           ),
                           validator: (value) {
-                            if (value == null || value.isEmpty) return 'NIM/NIDN tidak boleh kosong';
+                            if (value == null || value.isEmpty) {
+                              return '${_selectedRole == 'Mahasiswa' ? 'NIM' : 'NIDN'} tidak boleh kosong';
+                            }
                             return null;
                           },
                         ),
@@ -205,17 +238,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               fullName: _namaController.text,
                               email: _emailController.text,
                               password: _passwordController.text,
-                              roles: 'mahasiswa', // default role
+                              roles: _selectedRole,
                               nimNidn: _nimController.text,
                               profilePict: 'assets/img/default-profile.png',
                               id: DateTime.now().millisecondsSinceEpoch.toString(),
+                              status: 'pending',
                             );
                             final currentContext = context;
                             final success = await currentContext.read<AuthProvider>().register(newUser);
                             if (!currentContext.mounted) return;
                             if (success) {
                               ScaffoldMessenger.of(currentContext).showSnackBar(
-                                const SnackBar(content: Text('Pendaftaran berhasil! Silakan login.')),
+                                const SnackBar(
+                                  content: Text('Pendaftaran berhasil! Silakan tunggu persetujuan dari Admin sebelum Anda dapat login.'),
+                                  backgroundColor: Colors.green,
+                                ),
                               );
                               Navigator.pushReplacementNamed(currentContext, "/login");
                             } else {

@@ -845,6 +845,14 @@ class _MainScreenState extends State<MainScreen> {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.how_to_reg, color: Colors.blueAccent),
+              title: const Text('Persetujuan Registrasi'),
+              onTap: () => {
+                _scaffoldKey.currentState?.closeDrawer(),
+                Navigator.pushNamed(context, "/user-approval"),
+              },
+            ),
+            ListTile(
               leading: SvgPicture.asset(
                 "assets/svgs/mahasiswa-icon.svg",
                 width: 25,

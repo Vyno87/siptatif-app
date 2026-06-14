@@ -27,8 +27,10 @@ import 'package:siptatif_app/providers/penguji_provider.dart';
 import 'package:siptatif_app/providers/logbook_provider.dart';
 import 'package:siptatif_app/providers/sidang_provider.dart';
 import 'package:siptatif_app/providers/yudisium_provider.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:siptatif_app/providers/theme_provider.dart';
 import 'package:siptatif_app/providers/chat_provider.dart';
+import 'package:siptatif_app/screens/admin/user_approval_screen.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -103,6 +105,7 @@ class _MainAppState extends State<MainApp> {
                 case "/pengesahan-revisi": page = const PengesahanRevisiScreen(); break;
                 case "/signature": page = const SignatureScreen(); break;
                 case "/manajemen-yudisium": page = const ManajemenYudisiumScreen(); break;
+                case "/user-approval": page = const UserApprovalScreen(); break;
                 default: page = const AuthWrapper();
               }
               return PageRouteBuilder(
