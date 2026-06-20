@@ -110,7 +110,7 @@ class PersetujuanAkunScreen extends StatelessWidget {
                                     ),
                                     Text(
                                       user.roles,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontFamily: 'Montserrat-Medium',
                                         fontSize: 14,
                                         color: AppTheme.primaryPurple,
