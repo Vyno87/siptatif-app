@@ -19,6 +19,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _nimController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _extraController = TextEditingController();
   
   bool passwordVisible = false;
   bool confirmPasswordVisible = false;
@@ -30,6 +31,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _nimController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _extraController.dispose();
     super.dispose();
   }
 
@@ -128,6 +130,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             setState(() {
                               _selectedRole = newValue!;
                               _nimController.clear();
+                              _extraController.clear();
                             });
                           },
                         ),
@@ -155,6 +158,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           },
                         ),
                       ).animate().fade(delay: 450.ms).slideX(begin: 0.2, end: 0),
+                      const SizedBox(height: 15),
+                      // Extra Field
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextFormField(
+                          controller: _extraController,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15.0),
+                              borderSide: BorderSide.none,
+                            ),
+                            filled: true,
+                            fillColor: isDark ? Colors.black26 : Colors.white60,
+                            hintText: _selectedRole == 'Mahasiswa' ? 'Program Studi' : 'Bidang Keahlian',
+                            prefixIcon: Icon(_selectedRole == 'Mahasiswa' ? Icons.book : Icons.lightbulb),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return '${_selectedRole == 'Mahasiswa' ? 'Program Studi' : 'Bidang Keahlian'} tidak boleh kosong';
+                            }
+                            return null;
+                          },
+                        ),
+                      ).animate().fade(delay: 475.ms).slideX(begin: -0.2, end: 0),
                       const SizedBox(height: 15),
                       SizedBox(
                         width: double.infinity,
@@ -240,6 +267,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               password: _passwordController.text,
                               roles: _selectedRole,
                               nimNidn: _nimController.text,
+                              extraInfo: _extraController.text,
                               profilePict: 'assets/img/default-profile.png',
                               id: DateTime.now().millisecondsSinceEpoch.toString(),
                               status: 'pending',

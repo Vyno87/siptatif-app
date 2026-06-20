@@ -7,6 +7,7 @@ class User {
   String roles;
   String? password;
   String? nimNidn;
+  String? extraInfo; // Program Studi (Mahasiswa) atau Bidang Keahlian (Dosen)
   String status;
 
   User({
@@ -17,6 +18,7 @@ class User {
     required this.roles, 
     this.password, 
     this.nimNidn, 
+    this.extraInfo,
     this.status = 'pending'
   });
 
@@ -29,6 +31,7 @@ class User {
       roles: json['roles'] ?? json['role'] ?? '',
       password: json['password'],
       nimNidn: json['nimNidn']?.toString(),
+      extraInfo: json['extraInfo'],
       status: json['status'] ?? 'approved', // Default 'approved' for old users without status
     );
   }
@@ -42,6 +45,7 @@ class User {
       'roles': roles,
       if (password != null) 'password': password,
       if (nimNidn != null) 'nimNidn': nimNidn,
+      if (extraInfo != null) 'extraInfo': extraInfo,
       'status': status,
     };
   }

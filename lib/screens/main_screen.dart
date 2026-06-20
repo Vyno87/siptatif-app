@@ -19,6 +19,7 @@ import 'package:siptatif_app/screens/chat_list_screen.dart';
 import 'package:siptatif_app/screens/dashboard_statistik_screen.dart';
 import 'package:siptatif_app/screens/kontak_dosen_screen.dart';
 import 'package:siptatif_app/screens/tentang_aplikasi_screen.dart';
+import 'package:siptatif_app/screens/persetujuan_akun_screen.dart';
 
 import 'package:provider/provider.dart';
 import 'package:siptatif_app/providers/auth_provider.dart';
@@ -907,6 +908,18 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ],
           const Divider(),
+          if (user?.roles == 'Admin')
+            ListTile(
+              leading: Icon(Icons.how_to_reg, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87),
+              title: Text('Persetujuan Akun', style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black)),
+              onTap: () {
+                _scaffoldKey.currentState?.closeDrawer();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const PersetujuanAkunScreen()),
+                );
+              },
+            ),
           ListTile(
             leading: Icon(Icons.settings, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87),
             title: Text('Pengaturan', style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black)),
