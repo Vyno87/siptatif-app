@@ -17,6 +17,7 @@ import 'package:siptatif_app/screens/pembimbing_screen.dart';
 import 'package:siptatif_app/screens/pengaturan_screen.dart';
 import 'package:siptatif_app/screens/chat_list_screen.dart';
 import 'package:siptatif_app/screens/dashboard_statistik_screen.dart';
+import 'package:siptatif_app/screens/kontak_dosen_screen.dart';
 
 import 'package:provider/provider.dart';
 import 'package:siptatif_app/providers/auth_provider.dart';
@@ -938,6 +939,17 @@ class _MainScreenState extends State<MainScreen> {
                     ],
                   ),
                 );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.contact_phone, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87),
+            title: Text('Kontak Dosen', style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black)),
+            onTap: () {
+              _scaffoldKey.currentState?.closeDrawer();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => KontakDosenScreen()),
+              );
             },
           ),
           if (user?.roles == 'Dosen') ...[
