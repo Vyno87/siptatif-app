@@ -18,6 +18,7 @@ import 'package:siptatif_app/screens/pengaturan_screen.dart';
 import 'package:siptatif_app/screens/chat_list_screen.dart';
 import 'package:siptatif_app/screens/dashboard_statistik_screen.dart';
 import 'package:siptatif_app/screens/kontak_dosen_screen.dart';
+import 'package:siptatif_app/screens/tentang_aplikasi_screen.dart';
 
 import 'package:provider/provider.dart';
 import 'package:siptatif_app/providers/auth_provider.dart';
@@ -25,7 +26,6 @@ import 'package:siptatif_app/providers/notifikasi_provider.dart';
 import 'package:siptatif_app/providers/theme_provider.dart';
 import 'package:siptatif_app/datas/models/user.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -921,24 +921,12 @@ class _MainScreenState extends State<MainScreen> {
           ListTile(
             leading: Icon(Icons.info_outline, color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87),
             title: Text('Tentang Aplikasi', style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black)),
-            onTap: () async {
+            onTap: () {
               _scaffoldKey.currentState?.closeDrawer();
-              final packageInfo = await PackageInfo.fromPlatform();
-              if (!mounted) return;
-              
-              showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: Text('SIPTATIF v${packageInfo.version}+${packageInfo.buildNumber}'),
-                    content: const Text('Sistem Informasi Penjadwalan Tugas Akhir Teknik Informatika (SIPTATIF).\n\nDikembangkan Oleh Ahmad Novy Mufasir Untuk Universitas Pamulang.'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Tutup'),
-                      ),
-                    ],
-                  ),
-                );
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const TentangAplikasiScreen()),
+              );
             },
           ),
           ListTile(
